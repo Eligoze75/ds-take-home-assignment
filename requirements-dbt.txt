@@ -1,0 +1,4 @@
+# Runtime for the dbt container (Dockerfile). Analysis dependencies live in requirements.txt.
+dbt-duckdb>=1.9,<2.0
+duckdb>=1.1
+pandas>=2.0

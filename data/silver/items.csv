@@ -1,0 +1,359 @@
+item_id,description,category,unit_of_measure,manufacturer_id,manufacturer_name
+ITM-0101,THHN Wire 14 AWG Black 500ft Reel,Wire & Cable,RL,MFG-01,NorthWire Co.
+ITM-0102,THHN Wire 14 AWG White 500ft Reel,Wire & Cable,RL,MFG-01,NorthWire Co.
+ITM-0103,THHN Wire 14 AWG Red 500ft Reel,Wire & Cable,RL,MFG-01,NorthWire Co.
+ITM-0104,THHN Wire 14 AWG Green 500ft Reel,Wire & Cable,RL,MFG-01,NorthWire Co.
+ITM-0105,THHN Wire 14 AWG Blue 500ft Reel,Wire & Cable,RL,MFG-01,NorthWire Co.
+ITM-0106,THHN Wire 14 AWG Yellow 500ft Reel,Wire & Cable,RL,MFG-02,Coppermark Cable Corp.
+ITM-0107,THHN Wire 12 AWG Black 500ft Reel,Wire & Cable,RL,MFG-01,NorthWire Co.
+ITM-0108,THHN Wire 12 AWG White 500ft Reel,Wire & Cable,RL,MFG-02,Coppermark Cable Corp.
+ITM-0109,THHN Wire 12 AWG Red 500ft Reel,Wire & Cable,RL,MFG-01,NorthWire Co.
+ITM-0110,THHN Wire 12 AWG Green 500ft Reel,Wire & Cable,RL,MFG-01,NorthWire Co.
+ITM-0111,THHN Wire 12 AWG Blue 500ft Reel,Wire & Cable,RL,MFG-02,Coppermark Cable Corp.
+ITM-0112,THHN Wire 12 AWG Yellow 500ft Reel,Wire & Cable,RL,MFG-01,NorthWire Co.
+ITM-0113,THHN Wire 10 AWG Black 500ft Reel,Wire & Cable,RL,MFG-01,NorthWire Co.
+ITM-0114,THHN Wire 10 AWG White 500ft Reel,Wire & Cable,RL,MFG-01,NorthWire Co.
+ITM-0117,THHN Wire 10 AWG Red 500ft Reel,Wire & Cable,RL,MFG-02,Coppermark Cable Corp.
+ITM-0118,THHN Wire 10 AWG Green 500ft Reel,Wire & Cable,RL,MFG-01,NorthWire Co.
+ITM-0119,THHN Wire 10 AWG Blue 500ft Reel,Wire & Cable,RL,MFG-01,NorthWire Co.
+ITM-0120,,Wire & Cable,RL,MFG-01,NorthWire Co.
+ITM-0121,THHN Wire 8 AWG Black 500ft Reel,Wire & Cable,RL,MFG-01,NorthWire Co.
+ITM-0122,THHN Wire 8 AWG White 500ft Reel,Wire & Cable,RL,MFG-02,Coppermark Cable Corp.
+ITM-0123,THHN Wire 8 AWG Red 500ft Reel,Wire & Cable,RL,MFG-02,Coppermark Cable Corp.
+ITM-0124,THHN Wire 8 AWG Green 500ft Reel,Wire & Cable,RL,MFG-02,Coppermark Cable Corp.
+ITM-0125,THHN Wire 8 AWG Blue 500ft Reel,Wire & Cable,RL,MFG-01,NorthWire Co.
+ITM-0126,THHN Wire 8 AWG Yellow 500ft Reel,Wire & Cable,RL,MFG-01,NorthWire Co.
+ITM-0127,THHN Wire 6 AWG Black 500ft Reel,Wire & Cable,RL,MFG-02,Coppermark Cable Corp.
+ITM-0128,THHN Wire 6 AWG White 500ft Reel,Wire & Cable,RL,MFG-02,Coppermark Cable Corp.
+ITM-0129,THHN Wire 6 AWG Red 500ft Reel,Wire & Cable,RL,MFG-02,Coppermark Cable Corp.
+ITM-0130,THHN Wire 6 AWG Green 500ft Reel,Wire & Cable,RL,MFG-01,NorthWire Co.
+ITM-0131,THHN Wire 6 AWG Blue 500ft Reel,Wire & Cable,RL,MFG-02,Coppermark Cable Corp.
+ITM-0132,THHN Wire 6 AWG Yellow 500ft Reel,Wire & Cable,RL,MFG-02,Coppermark Cable Corp.
+ITM-0133,NM-B Romex Cable 14/2 w/Ground 250ft,Wire & Cable,RL,MFG-02,Coppermark Cable Corp.
+ITM-0134,NM-B Romex Cable 14/3 w/Ground 250ft,Wire & Cable,RL,MFG-01,NorthWire Co.
+ITM-0135,NM-B Romex Cable 12/2 w/Ground 250ft,Wire & Cable,RL,MFG-02,Coppermark Cable Corp.
+ITM-0136,NM-B Romex Cable 12/3 w/Ground 250ft,Wire & Cable,RL,MFG-02,Coppermark Cable Corp.
+ITM-0137,NM-B Romex Cable 10/2 w/Ground 250ft,Wire & Cable,RL,MFG-02,Coppermark Cable Corp.
+ITM-0138,NM-B Romex Cable 10/3 w/Ground 250ft,Wire & Cable,RL,MFG-01,NorthWire Co.
+ITM-0139,UF-B Underground Feeder Cable 14/2 250ft,Wire & Cable,RL,MFG-02,Coppermark Cable Corp.
+ITM-0140,UF-B Underground Feeder Cable 12/2 250ft,Wire & Cable,RL,MFG-01,NorthWire Co.
+ITM-0141,UF-B Underground Feeder Cable 10/2 250ft,Wire & Cable,RL,MFG-02,Coppermark Cable Corp.
+ITM-0142,MC Cable 12/2 Aluminum Armor 250ft,Wire & Cable,RL,MFG-02,Coppermark Cable Corp.
+ITM-0143,MC Cable 12/3 Aluminum Armor 250ft,Wire & Cable,RL,MFG-02,Coppermark Cable Corp.
+ITM-0144,MC Cable 10/2 Aluminum Armor 250ft,Wire & Cable,RL,MFG-02,Coppermark Cable Corp.
+ITM-0146,MC Cable 10/3 Aluminum Armor 250ft,Wire & Cable,RL,MFG-02,Coppermark Cable Corp.
+ITM-0148,SOOW Cord 14/3 250ft Black,Wire & Cable,RL,MFG-01,NorthWire Co.
+ITM-0149,SOOW Cord 14/4 250ft Black,Wire & Cable,RL,MFG-01,NorthWire Co.
+ITM-0150,SOOW Cord 12/3 250ft Black,Wire & Cable,RL,MFG-01,NorthWire Co.
+ITM-0151,SOOW Cord 12/4 250ft Black,Wire & Cable,RL,MFG-02,Coppermark Cable Corp.
+ITM-0152,Low Voltage Thermostat Wire 18/2 250ft,Wire & Cable,RL,MFG-02,Coppermark Cable Corp.
+ITM-0153,Low Voltage Thermostat Wire 18/5 250ft,Wire & Cable,RL,MFG-02,Coppermark Cable Corp.
+ITM-0154,Low Voltage Thermostat Wire 18/8 250ft,Wire & Cable,RL,MFG-02,Coppermark Cable Corp.
+ITM-0155,THHN Wire 14AWG Red 500' Reel,Wire & Cable,RL,MFG-01,NorthWire Co.
+ITM-0156,THHN Wire 8AWG Grn 500' Reel,Wire & Cable,RL,MFG-01,NorthWire Co.
+ITM-0157,NM-B Romex Cable 14/2 W/G 250',Wire & Cable,RL,MFG-02,Coppermark Cable Corp.
+ITM-0158,MC Cable 12/2 Alum Armor 250',Wire & Cable,RL,MFG-02,Coppermark Cable Corp.
+ITM-0159,THHN Wire 6AWG Wht 500' Reel,Wire & Cable,RL,MFG-02,Coppermark Cable Corp.
+ITM-0160,THHN Wire 10AWG Grn 500' Reel,Wire & Cable,RL,MFG-02,Coppermark Cable Corp.
+ITM-0162,Low Voltage Thermostat Wire 18/8 250',Wire & Cable,RL,MFG-02,Coppermark Cable Corp.
+ITM-0163,THHN Wire 14AWG Grn 500' Reel,Wire & Cable,RL,MFG-02,Coppermark Cable Corp.
+ITM-0201,EMT Conduit 1/2in x 10ft,Conduit & Fittings,EA,MFG-04,Ferrotube Industries
+ITM-0202,EMT Conduit 3/4in x 10ft,Conduit & Fittings,EA,MFG-04,Ferrotube Industries
+ITM-0203,EMT Conduit 1in x 10ft,Conduit & Fittings,EA,MFG-03,SteelPath Conduit Co.
+ITM-0204,EMT Conduit 1-1/4in x 10ft,Conduit & Fittings,EA,MFG-04,Ferrotube Industries
+ITM-0205,EMT Conduit 1-1/2in x 10ft,Conduit & Fittings,EA,MFG-03,SteelPath Conduit Co.
+ITM-0206,EMT Conduit 2in x 10ft,Conduit & Fittings,EA,MFG-03,SteelPath Conduit Co.
+ITM-0207,PVC Conduit Sch 40 1/2in x 10ft,Conduit & Fittings,EA,MFG-04,Ferrotube Industries
+ITM-0208,PVC Conduit Sch 40 3/4in x 10ft,Conduit & Fittings,EA,MFG-03,SteelPath Conduit Co.
+ITM-0209,PVC Conduit Sch 40 1in x 10ft,Conduit & Fittings,EA,MFG-04,Ferrotube Industries
+ITM-0210,PVC Conduit Sch 40 1-1/4in x 10ft,Conduit & Fittings,EA,MFG-03,SteelPath Conduit Co.
+ITM-0211,PVC Conduit Sch 40 1-1/2in x 10ft,Conduit & Fittings,EA,MFG-04,Ferrotube Industries
+ITM-0212,PVC Conduit Sch 40 2in x 10ft,Conduit & Fittings,EA,MFG-03,SteelPath Conduit Co.
+ITM-0214,Rigid Metal Conduit 1/2in x 10ft,Conduit & Fittings,EA,MFG-03,SteelPath Conduit Co.
+ITM-0215,Rigid Metal Conduit 3/4in x 10ft,Conduit & Fittings,EA,MFG-04,Ferrotube Industries
+ITM-0216,Rigid Metal Conduit 1in x 10ft,Conduit & Fittings,EA,MFG-03,SteelPath Conduit Co.
+ITM-0217,EMT Connector 1/2in Set Screw,Conduit & Fittings,EA,MFG-04,Ferrotube Industries
+ITM-0218,EMT Connector 3/4in Set Screw,Conduit & Fittings,EA,MFG-03,SteelPath Conduit Co.
+ITM-0219,EMT Connector 1in Set Screw,Conduit & Fittings,EA,MFG-04,Ferrotube Industries
+ITM-0220,EMT Connector 1-1/4in Set Screw,Conduit & Fittings,EA,MFG-03,SteelPath Conduit Co.
+ITM-0221,EMT Connector 1-1/2in Set Screw,Conduit & Fittings,EA,MFG-04,Ferrotube Industries
+ITM-0222,EMT Connector 2in Set Screw,Conduit & Fittings,EA,MFG-03,SteelPath Conduit Co.
+ITM-0223,EMT Coupling 1/2in Set Screw,Conduit & Fittings,EA,MFG-04,Ferrotube Industries
+ITM-0224,EMT Coupling 3/4in Set Screw,Conduit & Fittings,EA,MFG-04,Ferrotube Industries
+ITM-0225,EMT Coupling 1in Set Screw,Conduit & Fittings,EA,MFG-04,Ferrotube Industries
+ITM-0226,EMT Coupling 1-1/4in Set Screw,Conduit & Fittings,EA,MFG-03,SteelPath Conduit Co.
+ITM-0227,EMT Coupling 1-1/2in Set Screw,Conduit & Fittings,EA,MFG-03,SteelPath Conduit Co.
+ITM-0228,EMT Coupling 2in Set Screw,Conduit & Fittings,EA,MFG-04,Ferrotube Industries
+ITM-0229,EMT Compression Connector 1/2in,Conduit & Fittings,EA,MFG-03,SteelPath Conduit Co.
+ITM-0230,EMT Compression Connector 3/4in,Conduit & Fittings,EA,MFG-04,Ferrotube Industries
+ITM-0231,EMT Compression Connector 1in,Conduit & Fittings,EA,MFG-03,SteelPath Conduit Co.
+ITM-0232,EMT Compression Connector 1-1/4in,Conduit & Fittings,EA,MFG-03,SteelPath Conduit Co.
+ITM-0234,PVC Conduit Elbow 1/2in 90deg,Conduit & Fittings,EA,MFG-03,SteelPath Conduit Co.
+ITM-0235,PVC Conduit Elbow 3/4in 90deg,Conduit & Fittings,EA,MFG-03,SteelPath Conduit Co.
+ITM-0236,PVC Conduit Elbow 1in 90deg,Conduit & Fittings,EA,MFG-04,Ferrotube Industries
+ITM-0237,PVC Conduit Elbow 1-1/4in 90deg,Conduit & Fittings,EA,MFG-04,Ferrotube Industries
+ITM-0238,PVC Conduit Elbow 1-1/2in 90deg,Conduit & Fittings,EA,MFG-03,SteelPath Conduit Co.
+ITM-0241,PVC Conduit Elbow 2in 90deg,Conduit & Fittings,EA,MFG-03,SteelPath Conduit Co.
+ITM-0242,PVC Coupling 1/2in,Conduit & Fittings,EA,MFG-03,SteelPath Conduit Co.
+ITM-0243,PVC Coupling 3/4in,Conduit & Fittings,EA,MFG-04,Ferrotube Industries
+ITM-0244,PVC Coupling 1in,Conduit & Fittings,EA,MFG-03,SteelPath Conduit Co.
+ITM-0245,PVC Coupling 1-1/4in,Conduit & Fittings,EA,MFG-04,Ferrotube Industries
+ITM-0246,PVC Coupling 1-1/2in,Conduit & Fittings,EA,MFG-04,Ferrotube Industries
+ITM-0247,PVC Coupling 2in,Conduit & Fittings,EA,MFG-03,SteelPath Conduit Co.
+ITM-0248,Liquid Tight Flexible Conduit 1/2in x 25ft,Conduit & Fittings,EA,MFG-03,SteelPath Conduit Co.
+ITM-0249,Liquid Tight Flexible Conduit 3/4in x 25ft,Conduit & Fittings,EA,MFG-03,SteelPath Conduit Co.
+ITM-0250,Liquid Tight Flexible Conduit 1in x 25ft,Conduit & Fittings,EA,MFG-03,SteelPath Conduit Co.
+ITM-0251,"PVC Conduit Elbow 1"" 90 Degree",Conduit & Fittings,EA,MFG-03,SteelPath Conduit Co.
+ITM-0252,"PVC Conduit Sch 40 1/2"" x 10'",Conduit & Fittings,EA,MFG-03,SteelPath Conduit Co.
+ITM-0253,"PVC Coupling 1""",Conduit & Fittings,EA,MFG-03,SteelPath Conduit Co.
+ITM-0254,"PVC Coupling 1-1/4""",Conduit & Fittings,EA,MFG-04,Ferrotube Industries
+ITM-0255,"EMT Compression Connector 1/2""",Conduit & Fittings,EA,MFG-03,SteelPath Conduit Co.
+ITM-0256,"EMT Coupling 1-1/4"" Set Screw",Conduit & Fittings,EA,MFG-03,SteelPath Conduit Co.
+ITM-0257,"PVC Coupling 3/4""",Conduit & Fittings,EA,MFG-04,Ferrotube Industries
+ITM-0301,"4in Square Junction Box - Metal, 1-1/2in Deep",Boxes & Enclosures,EA,MFG-05,Boxcraft Metal Products
+ITM-0302,"4in Square Junction Box - Metal, 2-1/8in Deep",Boxes & Enclosures,EA,MFG-05,Boxcraft Metal Products
+ITM-0303,4in Square Extension Ring 1-1/2in Deep,Boxes & Enclosures,EA,MFG-05,Boxcraft Metal Products
+ITM-0304,4in Square Extension Ring 2-1/8in Deep,Boxes & Enclosures,EA,MFG-05,Boxcraft Metal Products
+ITM-0306,Single Gang Old Work Box - Plastic,Boxes & Enclosures,EA,MFG-05,Boxcraft Metal Products
+ITM-0307,Single Gang New Construction Box - Plastic,Boxes & Enclosures,EA,MFG-05,Boxcraft Metal Products
+ITM-0309,1-Gang Device Box - Metal,Boxes & Enclosures,EA,MFG-05,Boxcraft Metal Products
+ITM-0310,2-Gang Device Box - Metal,Boxes & Enclosures,EA,MFG-05,Boxcraft Metal Products
+ITM-0311,3-Gang Device Box - Metal,Boxes & Enclosures,EA,MFG-05,Boxcraft Metal Products
+ITM-0312,4-Gang Device Box - Metal,Boxes & Enclosures,EA,MFG-05,Boxcraft Metal Products
+ITM-0313,"Octagon Ceiling Box - Metal, Fan Rated",Boxes & Enclosures,EA,MFG-05,Boxcraft Metal Products
+ITM-0314,Round Ceiling Pan Box 1/2in Deep,Boxes & Enclosures,EA,MFG-05,Boxcraft Metal Products
+ITM-0316,Weatherproof Outlet Box - While-In-Use Cover,Boxes & Enclosures,EA,MFG-05,Boxcraft Metal Products
+ITM-0317,NEMA 1 Enclosure 12x10x6,Boxes & Enclosures,EA,MFG-05,Boxcraft Metal Products
+ITM-0318,NEMA 1 Enclosure 16x14x8,Boxes & Enclosures,EA,MFG-05,Boxcraft Metal Products
+ITM-0319,NEMA 1 Enclosure 24x20x8,Boxes & Enclosures,EA,MFG-05,Boxcraft Metal Products
+ITM-0320,NEMA 3R Enclosure 12x10x6,Boxes & Enclosures,EA,MFG-05,Boxcraft Metal Products
+ITM-0321,NEMA 3R Enclosure 16x14x8,Boxes & Enclosures,EA,MFG-05,Boxcraft Metal Products
+ITM-0322,NEMA 3R Enclosure 24x20x8,Boxes & Enclosures,EA,MFG-05,Boxcraft Metal Products
+ITM-0323,NEMA 4X Enclosure 12x10x6,Boxes & Enclosures,EA,MFG-05,Boxcraft Metal Products
+ITM-0324,NEMA 4X Enclosure 16x14x8,Boxes & Enclosures,EA,MFG-05,Boxcraft Metal Products
+ITM-0325,NEMA 4X Enclosure 24x20x8,Boxes & Enclosures,EA,MFG-05,Boxcraft Metal Products
+ITM-0326,"Round Ceiling Pan Box 1/2"" Deep",Boxes & Enclosures,EA,MFG-05,Boxcraft Metal Products
+ITM-0327,"4"" Square J-Box - Metal, 1-1/2"" Deep",Boxes & Enclosures,EA,MFG-05,Boxcraft Metal Products
+ITM-0328,"4"" Square J-Box - Metal, 2-1/8"" Deep",Boxes & Enclosures,EA,MFG-05,Boxcraft Metal Products
+ITM-0401,Single Pole Switch 15A Ivory,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0402,Single Pole Switch 15A White,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0403,Single Pole Switch 15A Almond,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0404,3-Way Switch 15A Ivory,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0405,3-Way Switch 15A White,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0407,3-Way Switch 15A Almond,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0408,4-Way Switch 15A Ivory,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0409,4-Way Switch 15A White,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0411,4-Way Switch 15A Almond,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0412,Duplex Receptacle 15A Ivory,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0413,Duplex Receptacle 15A White,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0414,Duplex Receptacle 15A Almond,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0415,Duplex Receptacle 20A Ivory,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0416,Duplex Receptacle 20A White,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0418,Duplex Receptacle 20A Almond,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0419,GFCI Receptacle 15A Tamper Resistant Ivory,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0420,GFCI Receptacle 15A Tamper Resistant White,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0421,GFCI Receptacle 15A Tamper Resistant Almond,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0422,GFCI Receptacle 20A Tamper Resistant Ivory,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0423,GFCI Receptacle 20A Tamper Resistant White,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0424,GFCI Receptacle 20A Tamper Resistant Almond,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0425,USB Charger Receptacle 20A White,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0426,USB Charger Receptacle 20A Almond,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0427,USB Charger Receptacle 20A Black,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0428,Dimmer Switch Single Pole 600W,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0429,Dimmer Switch Single Pole 1000W,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0430,Decora Wall Plate 1-Gang White,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0431,Decora Wall Plate 1-Gang Ivory,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0432,Decora Wall Plate 1-Gang Almond,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0433,Decora Wall Plate 2-Gang White,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0434,Decora Wall Plate 2-Gang Ivory,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0435,Decora Wall Plate 2-Gang Almond,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0436,Decora Wall Plate 3-Gang White,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0437,Decora Wall Plate 3-Gang Ivory,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0438,Decora Wall Plate 3-Gang Almond,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0439,Occupancy Sensor Switch White,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0440,Occupancy Sensor Switch Ivory,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0441,Decora Wall Plate 2-Gang Wht,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0442,GFCI Outlet 20 Amp TR Ivory,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0443,4-Way Switch 15 Amp Ivory,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0444,GFCI Outlet 20 Amp TR Almond,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0445,USB Charger Outlet 20 Amp Almond,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0446,Occupancy Sensor Switch Wht,Wiring Devices,EA,MFG-06,Circuitide Devices
+ITM-0501,15A Single Pole Circuit Breaker,Circuit Protection,EA,MFG-07,Panelcore Industries
+ITM-0502,20A Single Pole Circuit Breaker,Circuit Protection,EA,MFG-07,Panelcore Industries
+ITM-0503,30A Single Pole Circuit Breaker,Circuit Protection,EA,MFG-07,Panelcore Industries
+ITM-0504,40A Single Pole Circuit Breaker,Circuit Protection,EA,MFG-07,Panelcore Industries
+ITM-0506,50A Single Pole Circuit Breaker,,EA,MFG-07,Panelcore Industries
+ITM-0507,60A Single Pole Circuit Breaker,Circuit Protection,EA,MFG-07,Panelcore Industries
+ITM-0508,15A Double Pole Circuit Breaker,Circuit Protection,EA,MFG-07,Panelcore Industries
+ITM-0509,20A Double Pole Circuit Breaker,Circuit Protection,EA,MFG-07,Panelcore Industries
+ITM-0510,30A Double Pole Circuit Breaker,Circuit Protection,EA,MFG-07,Panelcore Industries
+ITM-0511,40A Double Pole Circuit Breaker,Circuit Protection,EA,MFG-07,Panelcore Industries
+ITM-0512,50A Double Pole Circuit Breaker,Circuit Protection,EA,MFG-07,Panelcore Industries
+ITM-0513,60A Double Pole Circuit Breaker,Circuit Protection,EA,MFG-07,Panelcore Industries
+ITM-0514,15A GFCI Circuit Breaker,Circuit Protection,EA,MFG-07,Panelcore Industries
+ITM-0515,20A GFCI Circuit Breaker,Circuit Protection,EA,MFG-07,Panelcore Industries
+ITM-0516,15A AFCI Circuit Breaker,Circuit Protection,EA,MFG-07,Panelcore Industries
+ITM-0517,20A AFCI Circuit Breaker,Circuit Protection,EA,MFG-07,Panelcore Industries
+ITM-0518,100A Main Breaker Load Center 20-Space,Circuit Protection,EA,MFG-07,Panelcore Industries
+ITM-0519,100A Main Breaker Load Center 30-Space,Circuit Protection,EA,MFG-07,Panelcore Industries
+ITM-0520,100A Main Breaker Load Center 40-Space,Circuit Protection,EA,MFG-07,Panelcore Industries
+ITM-0521,150A Main Breaker Load Center 20-Space,Circuit Protection,EA,MFG-07,Panelcore Industries
+ITM-0522,150A Main Breaker Load Center 30-Space,Circuit Protection,EA,MFG-07,Panelcore Industries
+ITM-0523,150A Main Breaker Load Center 40-Space,Circuit Protection,EA,MFG-07,Panelcore Industries
+ITM-0524,200A Main Breaker Load Center 20-Space,Circuit Protection,EA,MFG-07,Panelcore Industries
+ITM-0525,200A Main Breaker Load Center 30-Space,Circuit Protection,EA,MFG-07,Panelcore Industries
+ITM-0526,200A Main Breaker Load Center 40-Space,Circuit Protection,EA,MFG-07,Panelcore Industries
+ITM-0527,Fuse 30A Class RK5,Circuit Protection,EA,MFG-07,Panelcore Industries
+ITM-0528,Fuse 60A Class RK5,Circuit Protection,EA,MFG-07,Panelcore Industries
+ITM-0530,Fuse 100A Class RK5,Circuit Protection,EA,MFG-07,Panelcore Industries
+ITM-0531,Surge Protective Device Type 2,Circuit Protection,EA,MFG-07,Panelcore Industries
+ITM-0532,15 Amp GFCI Breaker,Circuit Protection,EA,MFG-07,Panelcore Industries
+ITM-0534,200 Amp Main Breaker Load Center 40-Space,Circuit Protection,EA,MFG-07,Panelcore Industries
+ITM-0535,30 Amp 1-Pole Breaker,Circuit Protection,EA,MFG-07,Panelcore Industries
+ITM-0536,Fuse 30 Amp Class RK5,Circuit Protection,EA,MFG-07,Panelcore Industries
+ITM-0601,Wire Nut Gray - Box of 100,Connectors & Lugs,BX,MFG-08,Amperloc Industries
+ITM-0602,Wire Nut Blue - Box of 100,Connectors & Lugs,BX,MFG-08,Amperloc Industries
+ITM-0603,Wire Nut Orange - Box of 100,Connectors & Lugs,BX,MFG-08,Amperloc Industries
+ITM-0604,Wire Nut Yellow - Box of 100,Connectors & Lugs,BX,MFG-08,Amperloc Industries
+ITM-0605,Wire Nut Red - Box of 100,Connectors & Lugs,BX,MFG-08,Amperloc Industries
+ITM-0606,Split Bolt Connector 6-10 AWG,Connectors & Lugs,EA,MFG-08,Amperloc Industries
+ITM-0607,Split Bolt Connector 4-8 AWG,Connectors & Lugs,EA,MFG-08,Amperloc Industries
+ITM-0608,Split Bolt Connector 2/0-4 AWG,Connectors & Lugs,EA,MFG-08,Amperloc Industries
+ITM-0609,Copper Compression Lug 8 AWG,Connectors & Lugs,EA,MFG-08,Amperloc Industries
+ITM-0610,Copper Compression Lug 6 AWG,Connectors & Lugs,EA,MFG-08,Amperloc Industries
+ITM-0611,Copper Compression Lug 4 AWG,Connectors & Lugs,EA,MFG-08,Amperloc Industries
+ITM-0612,Copper Compression Lug 2 AWG,Connectors & Lugs,EA,MFG-08,Amperloc Industries
+ITM-0613,Copper Compression Lug 1/0 AWG,Connectors & Lugs,EA,MFG-08,Amperloc Industries
+ITM-0614,Copper Compression Lug 2/0 AWG,Connectors & Lugs,EA,MFG-08,Amperloc Industries
+ITM-0615,Insulated Ring Terminal 22-18 AWG - Bag of 25,Connectors & Lugs,BG,MFG-08,Amperloc Industries
+ITM-0618,Insulated Ring Terminal 16-14 AWG - Bag of 25,Connectors & Lugs,BG,MFG-08,Amperloc Industries
+ITM-0619,Insulated Ring Terminal 12-10 AWG - Bag of 25,Connectors & Lugs,BG,MFG-08,Amperloc Industries
+ITM-0620,Butt Splice Connector 22-18 AWG - Bag of 25,Connectors & Lugs,BG,MFG-08,Amperloc Industries
+ITM-0621,Butt Splice Connector 16-14 AWG - Bag of 25,Connectors & Lugs,BG,MFG-08,Amperloc Industries
+ITM-0622,Butt Splice Connector 12-10 AWG - Bag of 25,Connectors & Lugs,BG,MFG-08,Amperloc Industries
+ITM-0623,Mechanical Lug 1-Hole 6-14 AWG,Connectors & Lugs,EA,MFG-08,Amperloc Industries
+ITM-0624,Mechanical Lug 1-Hole 2-8 AWG,Connectors & Lugs,EA,MFG-08,Amperloc Industries
+ITM-0625,Mechanical Lug 2-Hole 6-14 AWG,Connectors & Lugs,EA,MFG-08,Amperloc Industries
+ITM-0627,Mechanical Lug 2-Hole 2-8 AWG,Connectors & Lugs,EA,MFG-08,Amperloc Industries
+ITM-0628,Ground Screw Green 10-32,Connectors & Lugs,EA,MFG-08,Amperloc Industries
+ITM-0629,Split Bolt Connector 6-10AWG,Connectors & Lugs,EA,MFG-08,Amperloc Industries
+ITM-0630,Insulated Ring Terminal 16-14AWG - Bg/25,Connectors & Lugs,BG,MFG-08,Amperloc Industries
+ITM-0631,Copper Compression Lug 6AWG,Connectors & Lugs,EA,MFG-08,Amperloc Industries
+ITM-0632,Butt Splice Connector 16-14AWG - Bg/25,Connectors & Lugs,BG,MFG-08,Amperloc Industries
+ITM-0702,LED Troffer 2x2 3500K 40W,Lighting,EA,MFG-09,Luminex Fixtures Inc.
+ITM-0703,LED Troffer 2x2 4000K 40W,Lighting,EA,MFG-09,Luminex Fixtures Inc.
+ITM-0704,LED Troffer 2x2 5000K 40W,Lighting,EA,MFG-09,Luminex Fixtures Inc.
+ITM-0705,LED Troffer 2x4 3500K 40W,Lighting,EA,MFG-09,Luminex Fixtures Inc.
+ITM-0706,LED Troffer 2x4 4000K 40W,Lighting,EA,MFG-09,Luminex Fixtures Inc.
+ITM-0707,LED Troffer 2x4 5000K 40W,Lighting,EA,MFG-09,Luminex Fixtures Inc.
+ITM-0708,LED High Bay Fixture 100W 4000K,Lighting,EA,MFG-09,Luminex Fixtures Inc.
+ITM-0709,LED High Bay Fixture 100W 5000K,Lighting,EA,MFG-09,Luminex Fixtures Inc.
+ITM-0710,LED High Bay Fixture 150W 4000K,Lighting,EA,MFG-09,Luminex Fixtures Inc.
+ITM-0711,LED High Bay Fixture 150W 5000K,Lighting,EA,MFG-09,Luminex Fixtures Inc.
+ITM-0712,LED High Bay Fixture 200W 4000K,Lighting,EA,MFG-09,Luminex Fixtures Inc.
+ITM-0713,LED High Bay Fixture 200W 5000K,Lighting,EA,MFG-09,Luminex Fixtures Inc.
+ITM-0714,LED Wall Pack 20W Bronze,Lighting,EA,MFG-09,Luminex Fixtures Inc.
+ITM-0715,LED Wall Pack 40W Bronze,Lighting,EA,MFG-09,Luminex Fixtures Inc.
+ITM-0716,LED Wall Pack 60W Bronze,Lighting,EA,MFG-09,Luminex Fixtures Inc.
+ITM-0717,LED Wall Pack 80W Bronze,Lighting,EA,MFG-09,Luminex Fixtures Inc.
+ITM-0718,Exit Sign LED Battery Backup Red,Lighting,EA,MFG-09,Luminex Fixtures Inc.
+ITM-0719,Exit Sign LED Battery Backup Green,Lighting,EA,MFG-09,Luminex Fixtures Inc.
+ITM-0721,Emergency Light Unit Dual Head LED,Lighting,EA,MFG-09,Luminex Fixtures Inc.
+ITM-0722,4ft LED Strip Light 3500K 32W,Lighting,EA,MFG-09,Luminex Fixtures Inc.
+ITM-0723,4ft LED Strip Light 4000K 32W,Lighting,EA,MFG-09,Luminex Fixtures Inc.
+ITM-0724,4ft LED Strip Light 5000K 32W,Lighting,EA,MFG-09,Luminex Fixtures Inc.
+ITM-0725,8ft LED Strip Light 3500K 32W,Lighting,EA,MFG-09,Luminex Fixtures Inc.
+ITM-0726,8ft LED Strip Light 4000K 32W,Lighting,EA,MFG-09,Luminex Fixtures Inc.
+ITM-0727,8ft LED Strip Light 5000K 32W,Lighting,EA,MFG-09,Luminex Fixtures Inc.
+ITM-0728,LED Downlight 4in 2700K,Lighting,EA,MFG-09,Luminex Fixtures Inc.
+ITM-0729,LED Downlight 4in 3000K,Lighting,EA,MFG-09,Luminex Fixtures Inc.
+ITM-0730,LED Downlight 4in 4000K,Lighting,EA,MFG-09,Luminex Fixtures Inc.
+ITM-0731,LED Downlight 6in 2700K,Lighting,EA,MFG-09,Luminex Fixtures Inc.
+ITM-0732,LED Downlight 6in 3000K,Lighting,EA,MFG-09,Luminex Fixtures Inc.
+ITM-0733,LED Downlight 6in 4000K,Lighting,EA,MFG-09,Luminex Fixtures Inc.
+ITM-0734,4' LED Strip Light 3500K 32W,Lighting,EA,MFG-09,Luminex Fixtures Inc.
+ITM-0736,"LED Downlight 4"" 3000K",Lighting,EA,MFG-09,Luminex Fixtures Inc.
+ITM-0737,8' LED Strip Light 5000K 32W,Lighting,EA,MFG-09,Luminex Fixtures Inc.
+ITM-0738,"LED Downlight 6"" 2700K",Lighting,EA,MFG-09,Luminex Fixtures Inc.
+ITM-0739,"LED Downlight 6"" 4000K",Lighting,EA,MFG-09,Luminex Fixtures Inc.
+ITM-0801,Copper Ground Rod 1/2in x 8ft,Grounding,EA,MFG-02,Coppermark Cable Corp.
+ITM-0803,Copper Ground Rod 1/2in x 10ft,Grounding,EA,MFG-10,Groundtech Manufacturing
+ITM-0804,Copper Ground Rod 5/8in x 8ft,Grounding,EA,MFG-10,Groundtech Manufacturing
+ITM-0805,Copper Ground Rod 5/8in x 10ft,Grounding,EA,MFG-10,Groundtech Manufacturing
+ITM-0806,Copper Ground Rod 3/4in x 8ft,Grounding,EA,MFG-02,Coppermark Cable Corp.
+ITM-0807,Copper Ground Rod 3/4in x 10ft,Grounding,EA,MFG-10,Groundtech Manufacturing
+ITM-0808,Ground Rod Clamp 1/2in,Grounding,EA,MFG-02,Coppermark Cable Corp.
+ITM-0809,Ground Rod Clamp 5/8in,Grounding,EA,MFG-10,Groundtech Manufacturing
+ITM-0810,Ground Rod Clamp 3/4in,Grounding,EA,,
+ITM-0811,Bare Copper Ground Wire 6 AWG 500ft,Grounding,RL,MFG-10,Groundtech Manufacturing
+ITM-0812,Bare Copper Ground Wire 4 AWG 500ft,Grounding,RL,MFG-02,Coppermark Cable Corp.
+ITM-0813,Bare Copper Ground Wire 2 AWG 500ft,Grounding,RL,MFG-02,Coppermark Cable Corp.
+ITM-0814,Intersystem Bonding Bridge,Grounding,EA,MFG-02,Coppermark Cable Corp.
+ITM-0815,Ground Bar Kit 14-Terminal,Grounding,EA,MFG-10,Groundtech Manufacturing
+ITM-0816,Ground Bar Kit 21-Terminal,Grounding,EA,MFG-10,Groundtech Manufacturing
+ITM-0817,"Copper Ground Rod 1/2"" x 10'",Grounding,EA,MFG-10,Groundtech Manufacturing
+ITM-0818,Bare Copper Ground Wire 2AWG 500',Grounding,RL,MFG-02,Coppermark Cable Corp.
+ITM-0901,,Fasteners & Supports,BX,MFG-11,Trussmount Supports Co.
+ITM-0902,Cable Staples 3/4in - Box of 100,Fasteners & Supports,BX,MFG-11,Trussmount Supports Co.
+ITM-0903,Conduit Strap 1/2in EMT - 1 Hole,Fasteners & Supports,EA,MFG-11,Trussmount Supports Co.
+ITM-0904,Conduit Strap 3/4in EMT - 1 Hole,Fasteners & Supports,EA,MFG-11,Trussmount Supports Co.
+ITM-0905,Conduit Strap 1in EMT - 1 Hole,Fasteners & Supports,EA,MFG-11,Trussmount Supports Co.
+ITM-0906,Conduit Strap 1-1/4in EMT - 1 Hole,Fasteners & Supports,EA,MFG-11,Trussmount Supports Co.
+ITM-0907,Conduit Strap 1-1/2in EMT - 1 Hole,Fasteners & Supports,EA,MFG-11,Trussmount Supports Co.
+ITM-0908,Conduit Strap 2in EMT - 1 Hole,Fasteners & Supports,EA,MFG-11,Trussmount Supports Co.
+ITM-0909,Conduit Strap 1/2in EMT - 2 Hole,Fasteners & Supports,EA,MFG-11,Trussmount Supports Co.
+ITM-0910,Conduit Strap 3/4in EMT - 2 Hole,Fasteners & Supports,EA,MFG-11,Trussmount Supports Co.
+ITM-0911,Conduit Strap 1in EMT - 2 Hole,Fasteners & Supports,EA,MFG-11,Trussmount Supports Co.
+ITM-0912,Conduit Strap 1-1/4in EMT - 2 Hole,Fasteners & Supports,EA,MFG-11,Trussmount Supports Co.
+ITM-0913,Conduit Strap 1-1/2in EMT - 2 Hole,Fasteners & Supports,EA,MFG-11,Trussmount Supports Co.
+ITM-0914,Conduit Strap 2in EMT - 2 Hole,Fasteners & Supports,EA,MFG-11,Trussmount Supports Co.
+ITM-0915,Beam Clamp 1/4-3/8in,Fasteners & Supports,EA,MFG-11,Trussmount Supports Co.
+ITM-0917,Beam Clamp 1/2in,Fasteners & Supports,EA,MFG-11,Trussmount Supports Co.
+ITM-0918,J-Hook Cable Support 3/4in,Fasteners & Supports,EA,MFG-11,Trussmount Supports Co.
+ITM-0919,J-Hook Cable Support 1-1/2in,Fasteners & Supports,EA,MFG-11,Trussmount Supports Co.
+ITM-0920,J-Hook Cable Support 2in,Fasteners & Supports,EA,MFG-11,Trussmount Supports Co.
+ITM-0921,J-Hook Cable Support 4in,Fasteners & Supports,EA,MFG-11,Trussmount Supports Co.
+ITM-0922,Threaded Rod 1/4in x 10ft,Fasteners & Supports,EA,MFG-11,Trussmount Supports Co.
+ITM-0923,Threaded Rod 3/8in x 10ft,Fasteners & Supports,EA,MFG-11,Trussmount Supports Co.
+ITM-0924,Threaded Rod 1/2in x 10ft,Fasteners & Supports,EA,MFG-11,Trussmount Supports Co.
+ITM-0925,Strut Channel 1-5/8in x 10ft Galvanized,Fasteners & Supports,EA,MFG-11,Trussmount Supports Co.
+ITM-0926,Strut Channel 1-5/8in x 10ft Green,Fasteners & Supports,EA,MFG-11,Trussmount Supports Co.
+ITM-0927,Strut Nut 1/4in,Fasteners & Supports,EA,MFG-11,Trussmount Supports Co.
+ITM-0928,Strut Nut 3/8in,Fasteners & Supports,EA,MFG-11,Trussmount Supports Co.
+ITM-0929,Strut Nut 1/2in,Fasteners & Supports,EA,MFG-11,Trussmount Supports Co.
+ITM-0930,Anchor Sleeve 1/4in - Box of 50,Fasteners & Supports,BX,MFG-11,Trussmount Supports Co.
+ITM-0931,Anchor Sleeve 3/8in - Box of 50,Fasteners & Supports,BX,MFG-11,Trussmount Supports Co.
+ITM-0932,Anchor Sleeve 1/2in - Box of 50,Fasteners & Supports,BX,MFG-11,Trussmount Supports Co.
+ITM-0933,"Self-Drilling Screw #10 x 3/4in - Box of 100",Fasteners & Supports,BX,MFG-11,Trussmount Supports Co.
+ITM-0934,"Self-Drilling Screw #10 x 1in - Box of 100",Fasteners & Supports,BX,MFG-11,Trussmount Supports Co.
+ITM-0936,"Self-Drilling Screw #10 x 1-1/2in - Box of 100",Fasteners & Supports,BX,MFG-11,Trussmount Supports Co.
+ITM-0937,Hex Bolt 1/4in x 1in Stainless Steel - Box of 25,Fasteners & Supports,BX,MFG-11,Trussmount Supports Co.
+ITM-0938,Hex Bolt 1/4in x 2in Stainless Steel - Box of 25,Fasteners & Supports,BX,MFG-11,Trussmount Supports Co.
+ITM-0939,Hex Bolt 3/8in x 1in Stainless Steel - Box of 25,Fasteners & Supports,BX,MFG-11,Trussmount Supports Co.
+ITM-0940,Hex Bolt 3/8in x 2in Stainless Steel - Box of 25,Fasteners & Supports,BX,MFG-11,Trussmount Supports Co.
+ITM-0941,"Self-Drilling Screw #10 x 1-1/2"" - Bx/100",Fasteners & Supports,BX,MFG-11,Trussmount Supports Co.
+ITM-0942,"Conduit Strap 3/4"" EMT - 1 Hole",Fasteners & Supports,EA,MFG-11,Trussmount Supports Co.
+ITM-0943,"Anchor Sleeve 1/2"" - Bx/50",Fasteners & Supports,BX,MFG-11,Trussmount Supports Co.
+ITM-0945,"Anchor Sleeve 1/4"" - Bx/50",Fasteners & Supports,BX,MFG-11,Trussmount Supports Co.
+ITM-0946,"Hex Bolt 1/4"" x 2"" SS - Bx/25",Fasteners & Supports,BX,MFG-11,Trussmount Supports Co.
+ITM-0947,"Conduit Strap 1"" EMT - 1 Hole",Fasteners & Supports,EA,MFG-11,Trussmount Supports Co.
+ITM-1001,Electrical Tape 3/4in x 66ft Black,Tape & Sealants,EA,MFG-12,SealRight Products
+ITM-1003,Electrical Tape 3/4in x 66ft Red,Tape & Sealants,EA,MFG-12,SealRight Products
+ITM-1004,Electrical Tape 3/4in x 66ft White,Tape & Sealants,EA,MFG-12,SealRight Products
+ITM-1005,Electrical Tape 3/4in x 66ft Blue,Tape & Sealants,EA,MFG-12,SealRight Products
+ITM-1006,Electrical Tape 3/4in x 66ft Green,Tape & Sealants,EA,MFG-12,SealRight Products
+ITM-1008,Electrical Tape 3/4in x 66ft Yellow,Tape & Sealants,EA,MFG-12,SealRight Products
+ITM-1010,Electrical Tape 3/4in x 66ft Black - 10 Pack,Tape & Sealants,PK,MFG-12,SealRight Products
+ITM-1011,Duct Seal Compound 1lb,Tape & Sealants,EA,MFG-12,SealRight Products
+ITM-1012,Silicone Sealant Weatherproof Clear 10oz,Tape & Sealants,EA,MFG-12,SealRight Products
+ITM-1013,Fire Barrier Sealant Red 10oz,Tape & Sealants,EA,MFG-12,SealRight Products
+ITM-1014,Heat Shrink Tubing 1/4in Black 4ft,Tape & Sealants,EA,MFG-12,SealRight Products
+ITM-1015,Heat Shrink Tubing 1/2in Black 4ft,Tape & Sealants,EA,MFG-12,SealRight Products
+ITM-1016,Heat Shrink Tubing 1in Black 4ft,Tape & Sealants,EA,MFG-12,SealRight Products
+ITM-1017,Cable Ties 4in Black - Bag of 100,Tape & Sealants,BG,MFG-12,SealRight Products
+ITM-1018,Cable Ties 8in Black - Bag of 100,Tape & Sealants,BG,MFG-12,SealRight Products
+ITM-1019,Cable Ties 11in Black - Bag of 100,Tape & Sealants,BG,MFG-12,SealRight Products
+ITM-1020,Cable Ties 14in Black - Bag of 100,Tape & Sealants,BG,MFG-12,SealRight Products
+ITM-1021,"Heat Shrink Tubing 1/2"" Blk 4'",Tape & Sealants,EA,MFG-12,SealRight Products
+ITM-1022,"Cable Ties 8"" Blk - Bg/100",Tape & Sealants,BG,MFG-12,SealRight Products
+ITM-1023,"Electrical Tape 3/4"" x 66' Blk - 10 Pack",Tape & Sealants,PK,MFG-12,SealRight Products

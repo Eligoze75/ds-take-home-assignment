@@ -1,0 +1,8 @@
+dbt-duckdb>=1.9,<2.0
+duckdb>=1.1
+pandas>=2.0
+pyyaml>=6.0
+scikit-learn>=1.4
+shap>=0.45
+matplotlib>=3.8
+jupyter>=1.0

@@ -1,0 +1,10 @@
+# Local DuckDB warehouse. No credentials, nothing to provision.
+# DATA_DIR defaults to ../data (relative to this folder). Point it elsewhere to run the
+# same project against a different dataset with the same schema.
+procurement_lakehouse:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "{{ env_var('DATA_DIR', '../data') }}/warehouse.duckdb"
+      threads: 4

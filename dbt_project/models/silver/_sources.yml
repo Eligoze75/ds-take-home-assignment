@@ -1,0 +1,57 @@
+version: 2
+
+sources:
+  - name: bronze
+    description: >
+      Raw, append-only extracts from the procurement source systems, landed as CSV files under
+      `$DATA_DIR/bronze/`. Read directly by DuckDB; every column arrives as text.
+    meta:
+      external_location: "read_csv('{{ env_var('DATA_DIR', '../data') }}/bronze/{name}.csv', header=true, all_varchar=true)"
+    tables:
+      - name: purchase_orders
+        description: Header-level purchase orders. One row per PO. Each PO belongs to one customer (tenant) and one vendor.
+        columns:
+          - name: po_number
+            description: PO identifier, e.g. PO-100123.
+          - name: customer_id
+            description: The Remarcable customer (tenant) that issued the PO, e.g. CUST-A.
+          - name: vendor_id
+            description: Vendor the PO was sent to.
+          - name: vendor_name
+          - name: order_date
+          - name: status
+            description: Open, Received, Closed or Cancelled.
+          - name: total_amount
+            description: PO total as recorded by the source system.
+
+      - name: itemized_purchase_orders
+        description: Line-level purchase order detail.
+        columns:
+          - name: po_number
+          - name: customer_id
+            description: Customer recorded on the line by the source system.
+          - name: item_id
+          - name: quantity_ordered
+          - name: unit_price_paid
+            description: Unit price on the line, in the item's unit of measure.
+
+      - name: items
+        description: Item master.
+        columns:
+          - name: item_id
+          - name: description
+          - name: category
+          - name: unit_of_measure
+            description: EA (each), RL (reel), BX (box), BG (bag), PK (pack).
+          - name: manufacturer_id
+          - name: manufacturer_name
+
+      - name: item_pricing
+        description: >
+          Vendor list price on file for an item, independent of any purchase. Vendors refresh their
+          price files about weekly, so each (item, vendor) has a series of snapshots over time.
+        columns:
+          - name: item_id
+          - name: vendor_id
+          - name: price_effective_date
+          - name: vendor_price

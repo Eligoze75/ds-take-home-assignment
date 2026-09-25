@@ -1,0 +1,41 @@
+query_id,query_type,query,expected_item_ids,notes
+Q01,abbreviation,"j-hook cable support 2""",ITM-0920,abbreviation / unit / synonym variant of an item with no near-duplicate
+Q02,no_match,copper pipe 3/4 type l,,nothing in the catalog should score highly
+Q03,misspelled,occupancy sensor swatch ivory,ITM-0440,one edit in token 'Switch'
+Q04,abbreviation,50 amp 2-pole breaker,ITM-0512,abbreviation / unit / synonym variant of an item with no near-duplicate
+Q05,misspelled,4-gang dovice box metal,ITM-0312,one edit in token 'Device'
+Q06,abbreviation,"strut channel 1-5/8"" x 10' grn",ITM-0926,abbreviation / unit / synonym variant of an item with no near-duplicate
+Q07,exact,split bolt connector 4-8 awg,ITM-0607,verbatim description
+Q08,abbreviation,15 amp 2-pole breaker,ITM-0508,abbreviation / unit / synonym variant of an item with no near-duplicate
+Q09,misspelled,pvc couling 2in,ITM-0247,one edit in token 'Coupling'
+Q10,partial,fuse class rk5,ITM-0527|ITM-0528|ITM-0530|ITM-0536,"subset of tokens, original order; every item containing all tokens is relevant"
+Q11,misspelled,pvc condut elbow 1/2in 90deg,ITM-0234,one edit in token 'Conduit'
+Q12,abbreviation,uf-b underground feeder cable 14/2 250',ITM-0139,abbreviation / unit / synonym variant of an item with no near-duplicate
+Q13,exact,emt coupling 1in set screw,ITM-0225,verbatim description
+Q14,partial,coupling set screw,ITM-0223|ITM-0224|ITM-0225|ITM-0226|ITM-0227|ITM-0228|ITM-0256,"subset of tokens, original order; every item containing all tokens is relevant"
+Q15,abbreviation,"electrical metallic tubing 2"" x 10'",ITM-0206,abbreviation / unit / synonym variant of an item with no near-duplicate
+Q16,partial,threaded 1/4in 10ft,ITM-0922,"subset of tokens, original order; every item containing all tokens is relevant"
+Q17,word_order,4-way 15a white switch,ITM-0409,"all tokens, shuffled; every item containing all tokens is relevant"
+Q18,misspelled,mc cable 10/2 alumnium armor 250ft,ITM-0144,one edit in token 'Aluminum'
+Q19,word_order,bay 5000k high 100w led fixture,ITM-0709,"all tokens, shuffled; every item containing all tokens is relevant"
+Q20,exact,rigid metal conduit 1in x 10ft,ITM-0216,verbatim description
+Q21,partial,3/4in white,ITM-1004,"subset of tokens, original order; every item containing all tokens is relevant"
+Q22,partial,150a breaker,ITM-0521|ITM-0522|ITM-0523,"subset of tokens, original order; every item containing all tokens is relevant"
+Q23,misspelled,30a stngle pole circuit breaker,ITM-0503|ITM-0535,one edit in token 'Single'
+Q24,misspelled,4-way switch 15a aomond,ITM-0411,one edit in token 'Almond'
+Q25,abbreviation,"electrical metallic tubing 1-1/2"" x 10'",ITM-0205,abbreviation / unit / synonym variant of an item with no near-duplicate
+Q26,exact,nema 4x enclosure 16x14x8,ITM-0324,verbatim description
+Q27,no_match,drywall screws 1-5/8 coarse,,nothing in the catalog should score highly
+Q28,no_match,pex tubing 1/2 red 100ft,,nothing in the catalog should score highly
+Q29,partial,fuse 30a rk5,ITM-0527|ITM-0536,"subset of tokens, original order; every item containing all tokens is relevant"
+Q30,exact,4in square extension ring 2-1/8in deep,ITM-0304,verbatim description
+Q31,partial,100a breaker,ITM-0518|ITM-0519|ITM-0520,"subset of tokens, original order; every item containing all tokens is relevant"
+Q32,abbreviation,thhn wire 12awg red 500' reel,ITM-0109,abbreviation / unit / synonym variant of an item with no near-duplicate
+Q33,word_order,enclosure nema 16x14x8 1,ITM-0318,"all tokens, shuffled; every item containing all tokens is relevant"
+Q34,misspelled,condnit strap 1-1/4in emt 1 hole,ITM-0906,one edit in token 'Conduit'
+Q35,partial,2x4 5000k 40w,ITM-0707,"subset of tokens, original order; every item containing all tokens is relevant"
+Q36,no_match,hvac filter 20x25x1,,nothing in the catalog should score highly
+Q37,word_order,thhn 500ft black wire 12 awg reel,ITM-0107,"all tokens, shuffled; every item containing all tokens is relevant"
+Q38,exact,soow cord 14/4 250ft black,ITM-0149,verbatim description
+Q39,exact,thhn wire 8 awg blue 500ft reel,ITM-0125,verbatim description
+Q40,exact,copper compression lug 4 awg,ITM-0611,verbatim description

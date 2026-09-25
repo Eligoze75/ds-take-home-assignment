@@ -1,0 +1,20 @@
+name: 'procurement_lakehouse'
+version: '2.0.0'
+config-version: 2
+
+profile: 'procurement_lakehouse'
+
+model-paths: ["models"]
+macro-paths: ["macros"]
+test-paths: ["tests"]
+
+clean-targets: ["target", "dbt_packages"]
+
+models:
+  procurement_lakehouse:
+    silver:
+      +materialized: table   # tables, not views: a view would embed the path of the bronze files as seen by whoever built it
+      +schema: silver
+    gold:
+      +materialized: table
+      +schema: gold

@@ -1,0 +1,54 @@
+version: 2
+
+models:
+  - name: dim_item
+    description: One row per catalog item.
+    columns:
+      - name: item_id
+        tests: [unique, not_null]
+
+  - name: dim_vendor
+    description: One row per vendor that has received a purchase order.
+    columns:
+      - name: vendor_id
+        tests: [unique, not_null]
+
+  - name: dim_customer
+    description: One row per customer (tenant) with first / last order dates and PO count.
+    columns:
+      - name: customer_id
+        tests: [unique, not_null]
+
+  - name: fct_purchase_order_line
+    description: >
+      Purchase order lines with header attributes (vendor, order date, status) attached.
+      Grain: one row per PO line. Feeds spend and price reporting.
+    columns:
+      - name: po_number
+        tests: [not_null]
+      - name: item_id
+        tests: [not_null]
+      - name: vendor_id
+        tests: [not_null]
+      - name: order_date
+        tests: [not_null]
+      - name: status
+        tests:
+          - accepted_values:
+              values: ['Open', 'Received', 'Closed', 'Cancelled']
+
+  - name: item_purchase_history
+    description: >
+      Legacy aggregate. One row per item: how often it has been purchased, earliest / latest
+      purchase dates, and a percentile breakdown of unit price paid. Feeds the procurement
+      analytics dashboards.
+    columns:
+      - name: item_id
+        tests: [unique, not_null]
+      - name: purchase_frequency
+      - name: earliest_purchase_date
+      - name: latest_purchase_date
+      - name: price_p25
+      - name: price_p50
+      - name: price_p75
+      - name: price_p90

@@ -1,0 +1,13 @@
+# `make dbt` / `make data` / `make test` run through this. DATA_DIR on the host is mounted at /data.
+services:
+  dbt:
+    build: .
+    image: procurement-lakehouse-dbt
+    volumes:
+      - .:/app
+      - ${DATA_DIR:-./data}:/data
+    working_dir: /app/dbt_project
+    environment:
+      DATA_DIR: /data
+    entrypoint: ["dbt"]
+    command: ["build"]

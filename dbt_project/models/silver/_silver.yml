@@ -1,0 +1,36 @@
+version: 2
+
+models:
+  - name: purchase_orders
+    description: Purchase order headers with normalised ids, dates, status casing and amounts.
+    columns:
+      - name: po_number
+        tests: [not_null]
+      - name: status
+        tests:
+          - accepted_values:
+              values: ['Open', 'Received', 'Closed', 'Cancelled']
+
+  - name: itemized_purchase_orders
+    description: Purchase order lines with normalised ids and typed quantity / price.
+    columns:
+      - name: po_number
+        tests: [not_null]
+      - name: item_id
+        tests: [not_null]
+
+  - name: items
+    description: Item master with blanks converted to nulls.
+    columns:
+      - name: item_id
+        tests: [unique, not_null]
+
+  - name: item_pricing
+    description: Vendor list-price snapshots with typed dates and amounts.
+    columns:
+      - name: item_id
+        tests: [not_null]
+      - name: vendor_id
+        tests: [not_null]
+      - name: price_effective_date
+        tests: [not_null]
