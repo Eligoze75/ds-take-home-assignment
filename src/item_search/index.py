@@ -7,6 +7,9 @@ class ItemSearchIndex:
     categories: list[str]
     manufacturers: list[str]
     sku_lookup: dict[str, dict]
+    items_by_category: dict[str, list[str]]
+    items_by_manufacturer: dict[str, list[str]]
+    items_by_manufacturer_id: dict[str, list[str]]
 
 
 def build_index(con: duckdb.DuckDBPyConnection) -> ItemSearchIndex:
@@ -51,6 +54,10 @@ def build_index(con: duckdb.DuckDBPyConnection) -> ItemSearchIndex:
         .apply(list)
         .to_dict()
     )
+    items_by_manufacturer_id = (
+        pop_df.sort_values("quantity_60d", ascending=False)
+        .groupby("manufacturer_id")["item_id"].apply(list).to_dict()
+    )
 
     return ItemSearchIndex(
         categories=sorted(categories),
@@ -58,4 +65,5 @@ def build_index(con: duckdb.DuckDBPyConnection) -> ItemSearchIndex:
         sku_lookup=sku_lookup,
         items_by_category=items_by_category,
         items_by_manufacturer=items_by_manufacturer,
+        items_by_manufacturer_id=items_by_manufacturer_id,
     )

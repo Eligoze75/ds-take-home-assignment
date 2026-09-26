@@ -17,6 +17,7 @@ SELECT
     i.item_id,
     i.category,
     i.manufacturer_name,
+    i.manufacturer_id,
     COALESCE(r.quantity_60d, 0) quantity_60d
 FROM {{ ref('dim_item') }} i
 LEFT JOIN recent_orders r 
