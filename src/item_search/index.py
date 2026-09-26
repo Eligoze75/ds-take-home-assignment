@@ -41,6 +41,8 @@ def build_index(con: duckdb.DuckDBPyConnection) -> ItemSearchIndex:
     sku_lookup = items_df.set_index(items_df["item_id"].str.lower()).to_dict("index")
 
     pop_df = con.sql("SELECT * FROM item_popularity").df()
+    pop_df["category"] = pop_df["category"].str.lower()
+    pop_df["manufacturer_name"] = pop_df["manufacturer_name"].str.lower()
 
     items_by_category = (
         pop_df.sort_values("quantity_60d", ascending=False)

@@ -1,7 +1,7 @@
 import numpy as np
 from rank_bm25 import BM25Okapi
 from sentence_transformers import SentenceTransformer
-from utils import tokenize
+from src.item_search.utils import tokenize
 
 
 def build_description_index(dim_item_df, model_name: str = "all-MiniLM-L6-v2"):

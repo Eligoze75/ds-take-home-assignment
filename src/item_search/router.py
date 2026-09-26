@@ -4,7 +4,7 @@ from src.item_search.index import ItemSearchIndex
 
 
 SKU_PATTERN = re.compile(r"^itm-\d{4}$")
-MANUFACTURER_PATTERN = re.compile(r"^MFG-\d{2}$")
+MANUFACTURER_PATTERN = re.compile(r"^mfg-\d{2}$")
 
 
 def classify_query(

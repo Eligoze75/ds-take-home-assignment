@@ -1,5 +1,5 @@
 from rapidfuzz import fuzz, process
-from peach_fuzz import peach_fuzz
+from src.item_search.peach_fuzz import peach_fuzz
 
 
 def handle_sku(query, matched_value, index, score):
