@@ -20,7 +20,7 @@ def build_index(con: duckdb.DuckDBPyConnection) -> ItemSearchIndex:
         WHERE manufacturer_name IS NOT NULL
     """).df()["manufacturer_name"].tolist()
 
-    items_df = con.sql("select * from dim_item").df()
+    items_df = con.sql("SELECT * FROM dim_item").df()
     sku_lookup = items_df.set_index(items_df["item_id"].str.lower()).to_dict("index")
 
     return ItemSearchIndex(
