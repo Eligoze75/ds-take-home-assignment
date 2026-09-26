@@ -6,6 +6,8 @@ models:
     columns:
       - name: item_id
         tests: [unique, not_null]
+      - name: search_text
+        tests: [not_null]
 
   - name: dim_vendor
     description: One row per vendor that has received a purchase order.
