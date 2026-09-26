@@ -6,13 +6,7 @@ from utils import tokenize
 
 def build_description_index(dim_item_df, model_name: str = "all-MiniLM-L6-v2"):
 
-    texts = (
-        dim_item_df["description"].fillna("")
-        + " "
-        + dim_item_df["category"].fillna("")
-        + " "
-        + dim_item_df["manufacturer_name"].fillna("")
-    ).tolist()
+    texts = dim_item_df["search_text"].tolist()
 
     bm25 = BM25Okapi([tokenize(t) for t in texts])
 
