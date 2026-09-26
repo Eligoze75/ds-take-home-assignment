@@ -1,0 +1,12 @@
+"""
+Selected search settings.
+These params obtained the best performance on the evals set.
+"""
+
+EMBEDDING_MODEL = "all-MiniLM-L6-v2"
+PEACH_FUZZ_ALPHA = 0.8
+PEACH_FUZZ_SEMANTIC_FLOOR = 0.45
+PEACH_FUZZ_TOP_K = 3
+DESCRIPTION_SCORE_CUTOFF = 0.60
+CATEGORY_MATCH_THRESHOLD = 87.5
+MANUFACTURER_MATCH_THRESHOLD = 87.5

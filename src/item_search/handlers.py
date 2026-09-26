@@ -1,4 +1,10 @@
 from rapidfuzz import fuzz, process
+from src.item_search.config import (
+    DESCRIPTION_SCORE_CUTOFF,
+    PEACH_FUZZ_ALPHA,
+    PEACH_FUZZ_SEMANTIC_FLOOR,
+    PEACH_FUZZ_TOP_K,
+)
 from src.item_search.peach_fuzz import peach_fuzz
 
 
@@ -80,8 +86,14 @@ def handle_manufacturer_id(query, matched_value, index, score):
     ]
 
 
-def handle_description(query, matched_value, index, score, desc_index, threshold):
-    results = peach_fuzz(matched_value, desc_index)
+def handle_description(query, matched_value, index, score, desc_index):
+    results = peach_fuzz(
+        matched_value,
+        desc_index,
+        alpha=PEACH_FUZZ_ALPHA,
+        semantic_floor=PEACH_FUZZ_SEMANTIC_FLOOR,
+        top_k=PEACH_FUZZ_TOP_K,
+    )
     return [
         {
             "query": query,
@@ -92,7 +104,7 @@ def handle_description(query, matched_value, index, score, desc_index, threshold
             "route_score": None,
         }
         for r in results
-        if r["score"] >= threshold
+        if r["score"] >= DESCRIPTION_SCORE_CUTOFF
     ]
 
 

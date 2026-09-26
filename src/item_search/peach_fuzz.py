@@ -1,10 +1,16 @@
 import numpy as np
 from rank_bm25 import BM25Okapi
 from sentence_transformers import SentenceTransformer
+from src.item_search.config import (
+    EMBEDDING_MODEL,
+    PEACH_FUZZ_ALPHA,
+    PEACH_FUZZ_SEMANTIC_FLOOR,
+    PEACH_FUZZ_TOP_K,
+)
 from src.item_search.utils import tokenize
 
 
-def build_description_index(dim_item_df, model_name: str = "all-MiniLM-L6-v2"):
+def build_description_index(dim_item_df, model_name: str = EMBEDDING_MODEL):
 
     texts = dim_item_df["search_text"].tolist()
 
@@ -25,9 +31,9 @@ def build_description_index(dim_item_df, model_name: str = "all-MiniLM-L6-v2"):
 def peach_fuzz(
     query: str,
     desc_index: dict,
-    alpha: float = 0.5,
-    semantic_floor: float = 0.3,
-    top_k: int = 10,
+    alpha: float = PEACH_FUZZ_ALPHA,
+    semantic_floor: float = PEACH_FUZZ_SEMANTIC_FLOOR,
+    top_k: int = PEACH_FUZZ_TOP_K,
 ):
     query_vec = desc_index["model"].encode([query], normalize_embeddings=True)[0]
     # Note: cosine similarity is defined as (a · b) / (‖a‖ ‖b‖), but here ‖a‖ = ‖b‖ = 1

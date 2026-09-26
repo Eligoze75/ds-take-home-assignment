@@ -1,5 +1,9 @@
 import re
 from rapidfuzz import fuzz, process
+from src.item_search.config import (
+    CATEGORY_MATCH_THRESHOLD,
+    MANUFACTURER_MATCH_THRESHOLD,
+)
 from src.item_search.index import ItemSearchIndex
 
 
@@ -8,7 +12,10 @@ MANUFACTURER_PATTERN = re.compile(r"^mfg-\d{2}$")
 
 
 def classify_query(
-    query: str, index: ItemSearchIndex, category_threshold=90, manufacturer_threshold=90
+    query: str,
+    index: ItemSearchIndex,
+    category_threshold=CATEGORY_MATCH_THRESHOLD,
+    manufacturer_threshold=MANUFACTURER_MATCH_THRESHOLD,
 ):
     q = query.strip().lower()
 
