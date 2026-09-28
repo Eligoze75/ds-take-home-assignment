@@ -1,12 +1,10 @@
 with lines as (
 
-    select * from {{ ref('itemized_purchase_orders') }}
-
-),
-
-pos as (
-
-    select * from {{ ref('purchase_orders') }}
+    select
+        item_id,
+        unit_price_paid,
+        order_date
+    from {{ ref('fct_purchase_order_line') }}
 
 ),
 
@@ -21,10 +19,10 @@ joined as (
     select
         lines.item_id,
         lines.unit_price_paid,
-        pos.order_date
+        lines.order_date
     from lines
-    inner join pos   on lines.po_number = pos.po_number
-    inner join items on lines.item_id   = items.item_id
+    inner join items
+        on lines.item_id = items.item_id
 
 ),
 
