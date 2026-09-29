@@ -1,0 +1,425 @@
+---
+title: "When to buy the items you purchase most"
+subtitle: "For Company A. Purchases from January 2024 through September 2026."
+date: today
+date-format: "MMMM D, YYYY"
+format:
+  pdf:
+    documentclass: article
+    pdf-engine: xelatex
+    mainfont: Helvetica
+    fontsize: 10.5pt
+    geometry:
+      - margin=0.7in
+    colorlinks: false
+    number-sections: false
+    toc: false
+    fig-pos: "H"
+    include-in-header:
+      text: |
+        \usepackage{float}
+        \usepackage{parskip}
+        \setlength{\parskip}{0.4em}
+        \setlength{\parindent}{0pt}
+        \usepackage{caption}
+        \captionsetup{font=footnotesize,skip=3pt}
+        \makeatletter
+        \renewcommand{\section}{\@startsection{section}{1}{0pt}{0.85em}{0.3em}{\normalfont\large\bfseries}}
+        \newcommand{\subtitle}[1]{%
+          \apptocmd{\@title}{\par {\normalsize\mdseries #1\par}}{}{}%
+        }
+        \def\@maketitle{%
+          \newpage
+          \null
+          \begin{center}%
+            {\large\bfseries \@title \par}%
+            \vskip 0.15em
+            {\small \@date}%
+          \end{center}%
+          \par
+          \vskip 0.3em}
+        \makeatother
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{python}
+#| output: false
+from pathlib import Path
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+ROOT = Path.cwd()
+if not (ROOT / "data" / "gold").exists():
+    ROOT = ROOT.parent
+
+SHORT = {
+    "ITM-0426": "USB charger receptacle",
+    "ITM-0311": "3-gang metal device box",
+    "ITM-0612": "Copper lug, 2 AWG",
+    "ITM-0237": "PVC conduit elbow",
+    "ITM-0201": "EMT conduit, 1/2 in",
+    "ITM-0621": "Butt splice, bag of 25",
+    "ITM-0433": "Decora wall plate, white",
+    "ITM-0434": "Decora wall plate, ivory",
+    "ITM-1015": "Heat-shrink tubing",
+    "ITM-0929": "Strut nut, 1/2 in",
+    "ITM-0306": "Plastic old-work box",
+    "ITM-0611": "Copper lug, 4 AWG",
+}
+MONTHS = ["January", "February", "March", "April", "May", "June",
+          "July", "August", "September", "October", "November", "December"]
+# Months that run high and are worth naming next to a buy recommendation,
+# or that are the only timing note on an item with no cheap month.
+AVOID = [
+    ("ITM-0426", 6),
+    ("ITM-0311", 5),
+    ("ITM-0201", 3),
+    ("ITM-0929", 4),
+    ("ITM-0611", 11),
+]
+
+lines = pd.read_csv(ROOT / "data/gold/fct_company_a_purchase_line.csv", parse_dates=["order_date"])
+lines = lines.loc[lines["status"] != "Cancelled"].copy()
+lines["extended"] = lines["quantity_ordered"] * lines["unit_price_paid"]
+n_orders = lines["po_number"].nunique()
+
+items = lines.groupby("item_id", as_index=False).agg(
+    n_orders=("po_number", "nunique"),
+    n_months=("order_date", lambda s: s.dt.to_period("M").nunique()),
+    first_order=("order_date", "min"),
+    last_order=("order_date", "max"),
+    total_spend=("extended", "sum"),
+)
+items["span_days"] = (items["last_order"] - items["first_order"]).dt.days
+items["attachment"] = items["n_orders"] / n_orders
+items["eligible"] = (items["n_months"] >= 8) & (items["span_days"] >= 365)
+focus = items.loc[
+    (items["attachment"] > items["attachment"].quantile(0.9))
+    & items["eligible"]
+    & (items["total_spend"] > items["total_spend"].median())
+].copy()
+
+priced = lines.loc[lines["item_id"].isin(focus["item_id"])].dropna(subset=["unit_price_paid"]).copy()
+priced["relative_price"] = (
+    priced["unit_price_paid"] / priced.groupby("item_id")["unit_price_paid"].transform("median")
+)
+priced["year_month"] = priced["order_date"].dt.to_period("M").dt.to_timestamp()
+item_month = priced.groupby(["item_id", "year_month"], as_index=False)["relative_price"].median()
+month_index = pd.date_range(item_month["year_month"].min(), item_month["year_month"].max(), freq="MS")
+
+frames = []
+for item_id, group in item_month.groupby("item_id"):
+    series = group.set_index("year_month")["relative_price"].reindex(month_index)
+    series.index.name = "year_month"
+    frame = series.rename("relative_price").reset_index()
+    frame["item_id"] = item_id
+    frames.append(frame)
+by_item = pd.concat(frames, ignore_index=True)
+
+
+def straight_line(frame):
+    mask = frame["relative_price"].notna().to_numpy()
+    t = np.arange(len(frame), dtype=float)
+    slope, intercept = np.polyfit(t[mask], frame.loc[mask, "relative_price"].to_numpy(float), 1)
+    return slope * t + intercept
+
+
+pieces = []
+for _, frame in by_item.groupby("item_id", sort=False):
+    frame = frame.sort_values("year_month").copy()
+    frame["detrended"] = frame["relative_price"] - straight_line(frame)
+    pieces.append(frame)
+detrended = pd.concat(pieces, ignore_index=True)
+detrended["year"] = detrended["year_month"].dt.year
+detrended["month"] = detrended["year_month"].dt.month
+
+observed = (
+    detrended.dropna(subset=["detrended"])
+    .groupby(["item_id", "month", "year"], as_index=False)["detrended"]
+    .mean()
+)
+month_gap = observed.groupby(["item_id", "month"], as_index=False).agg(
+    n_years=("year", "nunique"),
+    gap=("detrended", "mean"),
+    years=("year", lambda s: ",".join(str(int(y)) for y in sorted(set(s)))),
+    all_under=("detrended", lambda s: bool((s < 0).all())),
+    all_over=("detrended", lambda s: bool((s > 0).all())),
+)
+
+median_price = priced.groupby("item_id")["unit_price_paid"].transform("median")
+valued = priced.assign(
+    month=priced["year_month"].dt.month,
+    typical_extended=priced["quantity_ordered"] * median_price,
+).merge(detrended[["item_id", "year_month", "detrended"]], on=["item_id", "year_month"])
+
+
+def as_percent(value):
+    points = abs(value) * 100
+    if points < 1:
+        return "under 1%"
+    return f"{points:.0f}%"
+
+
+def year_phrase(years):
+    parts = years.split(",")
+    if len(parts) == 1:
+        return parts[0]
+    if len(parts) == 2:
+        return f"{parts[0]} and {parts[1]}"
+    return ", ".join(parts[:-1]) + f", and {parts[-1]}"
+
+
+def year_span(years):
+    parts = years.split(",")
+    if len(parts) == 1:
+        return parts[0]
+    return f"{parts[0]}-{parts[-1]}"
+
+
+def cheap_savings(row):
+    part = valued.loc[valued["item_id"] == row.item_id]
+    outside = part["month"] != row.month
+    return (
+        part.loc[outside, "typical_extended"]
+        * (part.loc[outside, "detrended"] - row.gap)
+    ).sum()
+
+
+def high_extra(item_id, month):
+    part = valued.loc[(valued["item_id"] == item_id) & (valued["month"] == month)]
+    return (part["typical_extended"] * part["detrended"]).sum()
+
+
+cheap_rows = month_gap.loc[month_gap["all_under"]].copy()
+cheap_rows["savings"] = cheap_rows.apply(cheap_savings, axis=1)
+# More years first, then the deeper gap. One month per item.
+chosen = (
+    cheap_rows.sort_values(["item_id", "n_years", "gap"], ascending=[True, False, True])
+    .groupby("item_id", as_index=False)
+    .head(1)
+    .set_index("item_id")
+)
+chosen["name"] = chosen.index.map(SHORT)
+chosen["month_name"] = chosen["month"].map(lambda m: MONTHS[int(m) - 1])
+chosen["gap_label"] = chosen["gap"].map(as_percent)
+chosen["years_label"] = chosen["years"].map(year_phrase)
+
+# About $50 over the whole history is where a repeated month is worth planning around.
+recommend = chosen.loc[chosen["savings"] >= 50].sort_values("savings", ascending=False)
+modest = chosen.loc[(chosen["savings"] >= 15) & (chosen["savings"] < 50)].sort_values("savings", ascending=False)
+no_timing = chosen.loc[chosen["savings"] < 15].sort_values("savings", ascending=False)
+# Sum the rounded dollars the table shows, so the headline matches the rows.
+recommend_total = float(recommend["savings"].round(0).sum())
+modest_total = float(modest["savings"].round(0).sum())
+
+avoid_rows = []
+for item_id, month in AVOID:
+    gap_row = month_gap.loc[(month_gap["item_id"] == item_id) & (month_gap["month"] == month)].iloc[0]
+    yearly = observed.loc[(observed["item_id"] == item_id) & (observed["month"] == month)]
+    avoid_rows.append({
+        "item_id": item_id,
+        "name": SHORT[item_id],
+        "month_name": MONTHS[month - 1],
+        "gap": float(gap_row["gap"]),
+        "gap_label": as_percent(gap_row["gap"]),
+        "years": gap_row["years"],
+        "years_label": year_phrase(gap_row["years"]),
+        "extra": float(high_extra(item_id, month)),
+        "by_year": {int(r.year): float(r.detrended) for r in yearly.itertuples(index=False)},
+    })
+avoid = pd.DataFrame(avoid_rows).set_index("item_id")
+
+pooled = item_month.groupby("year_month")["relative_price"].median().reindex(month_index)
+mask = pooled.notna().to_numpy()
+t = np.arange(len(pooled), dtype=float)
+slope, intercept = np.polyfit(t[mask], pooled.to_numpy(float)[mask], 1)
+trend = pd.Series(slope * t + intercept, index=pooled.index)
+rise_pct = trend.iloc[-1] / trend.iloc[0] - 1
+rise_label = as_percent(rise_pct)
+season = pd.DataFrame({
+    "yoy": pooled.pct_change(12),
+    "detrended": pooled - trend,
+})
+season["year"] = season.index.year
+season["month"] = season.index.month
+
+frequent_share = float(items["attachment"].quantile(0.9))
+screen = {
+    "n_orders": int(n_orders),
+    "n_items": int(len(items)),
+    "n_eligible": int(items["eligible"].sum()),
+    "frequent_share": frequent_share,
+    "frequent_orders": frequent_share * n_orders,
+    "spend_cutoff": float(items["total_spend"].median()),
+    "n_focus": int(len(focus)),
+    "min_focus_spend": float(focus["total_spend"].min()),
+    "max_attachment": float(focus["attachment"].max()),
+    "start": lines["order_date"].min().strftime("%B %Y"),
+    "end": lines["order_date"].max().strftime("%B %Y"),
+}
+
+
+def money(item_id, frame=chosen):
+    return f"${frame.loc[item_id, 'savings']:,.0f}"
+
+
+def dollars(amount):
+    return f"${amount:,.0f}"
+```
+
+## Recommendation
+
+There is no calendar month in which the items purchased most often are consistently less expensive. Timing should be set by item, and only where the job can move by one or two months. Where it cannot, the material should be purchased when the job requires it.
+
+Five items meet that condition. On the orders placed from `{python} screen["start"]` through `{python} screen["end"]`, purchasing the other units in the month below would have reduced cost by `{python} dollars(recommend_total)`. July for the metal box is the clearest pattern: it was under the item's own rise in all three years. November for the USB charger is the largest saving, and that month has only two years behind it, uneven ones (about 2% under in 2024 and about 6% under in 2025).
+
+```{python}
+#| output: asis
+
+header = (
+    "| Item | Month | Below trend | Years | Saving |\n"
+    "|---|---|---:|---|---:|"
+)
+rows = []
+for item_id, row in recommend.iterrows():
+    rows.append(
+        f"| {row['name']} ({item_id}) | {row['month_name']} | {row['gap_label']} "
+        f"| {year_span(row['years'])} | {money(item_id)} |"
+    )
+print("\n".join([header, *rows]))
+```
+
+The saving is the gap between the price paid in the other months and the low month, valued at the item's usual unit price. Units already purchased in that month are excluded.
+
+```{python}
+#| fig-width: 6.6
+#| fig-height: 3.5
+#| fig-cap: "Saving if the other purchases had been made in the repeated low month. Dark bars are the five in the table. Pale bars are real months with too little money attached. The rest would not have saved money."
+
+chart = chosen.sort_values("savings", ascending=True)
+colors = []
+for saved in chart["savings"]:
+    if saved >= 50:
+        colors.append("#24577a")
+    elif saved >= 15:
+        colors.append("#8aa0b2")
+    else:
+        colors.append("#c5cdd2")
+labels = [f"{chart.loc[i, 'name']} ({i})" for i in chart.index]
+
+fig, ax = plt.subplots()
+ax.barh(labels, chart["savings"], color=colors, height=0.72)
+span = chart["savings"].max() - min(chart["savings"].min(), 0)
+pad = span * 0.16
+for item_id, saved in chart["savings"].items():
+    ax.text(
+        saved + (pad * 0.08 if saved >= 0 else -pad * 0.08),
+        labels[list(chart.index).index(item_id)],
+        f"${saved:,.0f}",
+        va="center",
+        ha="left" if saved >= 0 else "right",
+        fontsize=8,
+        color="#243038",
+    )
+ax.axvline(0, color="#8d979e", linewidth=0.8)
+ax.set_xlabel("Saving on this history")
+ax.set_xlim(min(chart["savings"].min(), 0) - pad, chart["savings"].max() + pad)
+ax.spines["top"].set_visible(False)
+ax.spines["right"].set_visible(False)
+ax.tick_params(length=0)
+fig.tight_layout()
+```
+
+Three further items show a repeated low month, and the dollars are small: the butt splice in August (`{python} money("ITM-0621")`), the white wall plate in February (`{python} money("ITM-0433")`), and the ivory wall plate in June (`{python} money("ITM-0434")`). Together that is about `{python} dollars(modest_total)`. Heat-shrink tubing, the strut nut, the plastic old-work box, and the 4 AWG copper lug do not justify a change in timing. For the last three, moving the other purchases onto the shallow low month would have cost a few dollars, because those purchases were already at least as cheap.
+
+Two other results bear on the same decision. Across Company A's purchases, the unit price is unchanged from 1 unit through 12. At 24 units it has been about 4% lower, and at 50 units about 7% lower. The day of the week does not move the price.
+
+## Why there is no single month
+
+The figure places every year on one calendar. Each item is first compared with its own typical price, and each item counts equally. The left panel is the change versus the same month a year earlier. It stays positive: the price level has been rising, by about `{python} rise_label` from the start of 2024 to `{python} screen["end"]`. A January that looks inexpensive is mostly that rise. The right panel is what remains after a straight line is removed. A month that was inexpensive for the group would fall below zero in every year. The three lines do not agree. Waiting a full year to catch a dip of 2% or 3% gives the reduction back to the rise.
+
+```{python}
+#| fig-width: 6.8
+#| fig-height: 2.7
+#| fig-cap: "Frequent items, each compared with its own typical price. Left: change versus the same month a year earlier. Right: price after the rise is removed."
+
+month_names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+year_color = {2024: "#2c7fb8", 2025: "#e6550d", 2026: "#31a354"}
+
+fig, axes = plt.subplots(1, 2)
+for year, frame in season.dropna(subset=["yoy"]).groupby("year"):
+    axes[0].plot(frame["month"], frame["yoy"], marker="o", markersize=3.5, linewidth=1.2, color=year_color[year], label=str(year))
+axes[0].axhline(0, color="gray", linewidth=0.8)
+axes[0].set_title("Change versus the same month a year earlier", fontsize=9)
+axes[0].set_ylabel("Year-over-year change", fontsize=8)
+axes[0].yaxis.set_major_formatter(plt.FuncFormatter(lambda value, _: f"{value:.0%}"))
+
+for year, frame in season.dropna(subset=["detrended"]).groupby("year"):
+    axes[1].plot(frame["month"], frame["detrended"], marker="o", markersize=3.5, linewidth=1.2, color=year_color[year], label=str(year))
+axes[1].axhline(0, color="gray", linewidth=0.8)
+axes[1].set_title("Price after the rise is removed", fontsize=9)
+axes[1].set_ylabel("Gap versus the trend", fontsize=8)
+axes[1].yaxis.set_major_formatter(plt.FuncFormatter(lambda value, _: f"{value:.0%}"))
+
+for ax in axes:
+    ax.set_xticks(range(1, 13))
+    ax.set_xticklabels([name if i % 2 == 0 else "" for i, name in enumerate(month_names)], fontsize=8)
+    ax.tick_params(axis="y", labelsize=7)
+    ax.set_xlabel("Calendar month", fontsize=8)
+    ax.grid(True, color="#e6e6e6", linewidth=0.6)
+    ax.set_axisbelow(True)
+handles, labels = axes[1].get_legend_handles_labels()
+fig.legend(handles, labels, loc="upper center", ncol=3, frameon=False, fontsize=8, bbox_to_anchor=(0.5, 1.06))
+fig.tight_layout(rect=(0, 0, 1, 0.90))
+```
+
+A similar item is not a guide. The white plate and the ivory plate, the two copper lugs, and the metal box and the plastic box do not share a month.
+
+## When not to buy
+
+A few months run high in every year they appear. Little of the spend fell in them, so the extra actually paid is small. Those amounts are not added to the `{python} dollars(recommend_total)`. Where the item is already in the table above, that saving already assumes the high-month purchases move.
+
+```{python}
+#| output: asis
+
+header = (
+    "| Item | Month | Above trend | Years | Extra paid |\n"
+    "|---|---|---:|---|---:|"
+)
+rows = []
+for item_id, row in avoid.sort_values("extra", ascending=False).iterrows():
+    rows.append(
+        f"| {row['name']} ({item_id}) | {row['month_name']} | {row['gap_label']} "
+        f"| {year_span(row['years'])} | {dollars(round(row['extra']))} |"
+    )
+print("\n".join([header, *rows]))
+```
+
+June for the USB charger is the only row with real money on it, about `{python} dollars(avoid.loc["ITM-0426", "extra"])`. It is already inside the `{python} money("ITM-0426")`. March for EMT conduit was about 5% over in 2024 and about 6% over in 2025, and nearly flat in 2026, so March is the high side of that item without being a firm rule. November for the 4 AWG lug is the month in which the 2 AWG lug is low. A month should not be transferred from one to the other.
+
+## What the review covers
+
+Cancelled orders are excluded. The history is `{python} f"{screen['n_orders']:,}"` orders and `{python} screen["n_items"]` items, from `{python} screen["start"]` through `{python} screen["end"]`.
+
+An item is in the timing review only if it clears three tests. The cutoffs are computed on the full catalog, and then all three are applied together.
+
+**Frequent.** The item is on more orders than 90% of the catalog. That bar is `{python} f"{screen['frequent_share']:.1%}"` of orders, about `{python} f"{screen['frequent_orders']:.0f}"` orders. `{python} screen["n_focus"]` items clear it. The busiest is on `{python} f"{screen['max_attachment']:.1%}"` of orders. A rule that required the item on most orders would have returned nothing, because a typical order has only a few lines.
+
+**Long enough to compare a season.** At least 8 distinct months, and at least a year between the first and last purchase. `{python} screen["n_eligible"]` items clear this on their own. All `{python} screen["n_focus"]` frequent items already span the window, so this test removed none of them.
+
+**Enough spend to be worth a better price.** Total dollars above the median item, about `{python} dollars(round(screen["spend_cutoff"]))`. The median is the bar because the top of the spend distribution is a few very large items, and a high percentile would let those items decide the list. Every frequent item is already above the median. The smallest of the `{python} screen["n_focus"]` is about `{python} dollars(round(screen["min_focus_spend"]))`.
+
+## What we did
+
+The paid price is compared with that item's own typical price, the median unit price on its purchases. A straight line is then removed. Without that step, an early month looks cheap because it is earlier in the rise. A month counts only when it sits on the same side of that line in every year with a purchase. One month is kept per item: more years first, then the deeper gap. The dollar figure uses the other purchases only, valued at the typical price.
+
+## What this record cannot account for
+
+The amounts describe orders already placed. They are not a price for the next order. November 2026 has not occurred, so the two November recommendations rest on 2024 and 2025, as does September for the PVC elbow.
+
+A vendor can offer a discount this history does not show. Copper, freight, and the wider market can move a price for reasons a month will not explain. These purchases alone do not show whether a low month is the vendor's list price or a price Company A negotiated. The cost of holding material, or of a job that waits, is not in the record. A low month is useful only when the work can move by a month or two, or the material can be held.
