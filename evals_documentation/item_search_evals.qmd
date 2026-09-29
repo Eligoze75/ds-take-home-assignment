@@ -1,0 +1,544 @@
+---
+title: "Item Search Evals"
+subtitle: "Pipeline Performance Evaluation"
+format:
+  pdf:
+    documentclass: article
+    pdf-engine: pdflatex
+    geometry:
+      - margin=0.75in
+    fontsize: 11pt
+    colorlinks: true
+    fig-pos: "H"
+    tbl-cap-location: top
+    fig-cap-location: bottom
+execute:
+  echo: false
+  warning: false
+  message: false
+  timeout: 300
+jupyter: remarcable_env
+---
+
+```{python}
+import os
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+os.environ["HF_HUB_DISABLE_PROGRESS_BARS"] = "1"
+os.environ["TRANSFORMERS_VERBOSITY"] = "error"
+
+import logging
+import sys
+import time
+import warnings
+from pathlib import Path
+
+warnings.filterwarnings("ignore")
+logging.getLogger("sentence_transformers").setLevel(logging.ERROR)
+logging.getLogger("transformers").setLevel(logging.ERROR)
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from rapidfuzz import fuzz, process
+
+def find_root() -> Path:
+    here = Path.cwd().resolve()
+    for cand in [here, *here.parents]:
+        if (cand / "src" / "item_search" / "search_pipeline.py").exists():
+            return cand
+    raise FileNotFoundError(f"repo root not found from {here}")
+
+ROOT = find_root()
+sys.path.insert(0, str(ROOT))
+
+from src.item_search.config import (
+    DESCRIPTION_SCORE_CUTOFF,
+    PEACH_FUZZ_ALPHA,
+    PEACH_FUZZ_SEMANTIC_FLOOR,
+    PEACH_FUZZ_TOP_K,
+    CATEGORY_MATCH_THRESHOLD,
+)
+from src.item_search.evals import _average_precision, _parse_ids, _reciprocal_rank, _retrieved_ids
+from src.item_search.peach_fuzz import peach_fuzz
+from src.item_search.router import classify_query
+from src.item_search.search_pipeline import conn, desc_index, idx, search_item
+
+search_item("thhn wire")
+
+plt.rcParams.update({
+    "font.size": 10,
+    "axes.spines.top": False,
+    "axes.spines.right": False,
+    "axes.grid": True,
+    "grid.color": "#e6e6e6",
+    "grid.linewidth": 0.6,
+    "axes.axisbelow": True,
+    "figure.facecolor": "white",
+    "pdf.fonttype": 42,
+    "ps.fonttype": 42,
+})
+
+RECALL_C = "#1f6f6a"
+PREC_C = "#d4762c"
+F1_C = "#3d4c6f"
+MISS_C = "#b04a4a"
+
+CASE_ORDER = ["exact", "misspelled", "word_order", "abbreviation", "partial", "no_match"]
+CASE_LABEL = {
+    "exact": "Exact",
+    "misspelled": "Misspelled",
+    "word_order": "Word order",
+    "abbreviation": "Abbreviation",
+    "partial": "Partial",
+    "no_match": "No match",
+}
+INTENT_LABEL = {
+    "sku": "SKU",
+    "sku_not_found": "SKU, not in catalog",
+    "category": "Category",
+    "manufacturer": "Manufacturer",
+    "manufacturer_id": "Manufacturer id",
+    "description": "Description",
+}
+
+
+def retrieval_metrics(expected, retrieved):
+    expected_set = set(expected)
+    hit_count = sum(item_id in expected_set for item_id in retrieved)
+    if not retrieved and not expected:
+        precision, recall = 1.0, 1.0
+    elif not retrieved:
+        precision, recall = 0.0, 0.0
+    else:
+        precision = hit_count / len(retrieved)
+        recall = hit_count / len(expected) if expected else 1.0
+    f1 = 2 * precision * recall / (precision + recall) if precision + recall else 0.0
+    return {
+        "recall": recall,
+        "precision": precision,
+        "f1": f1,
+        "reciprocal_rank": _reciprocal_rank(retrieved, expected_set),
+        "average_precision": _average_precision(retrieved, expected_set),
+        "n_expected": len(expected),
+        "n_returned": len(retrieved),
+    }
+
+
+def old_description_ids(query):
+    raw = peach_fuzz(
+        query.strip().lower(),
+        desc_index,
+        alpha=0.5,
+        semantic_floor=0.3,
+        top_k=10,
+    )
+    return [row["item_id"] for row in raw if row["score"] >= 0.5]
+
+
+def score_file(path):
+    queries = pd.read_csv(ROOT / path)
+    rows = []
+    for _, row in queries.iterrows():
+        intent, _, _ = classify_query(row["query"], idx)
+        expected = _parse_ids(row["expected_item_ids"])
+        started = time.perf_counter()
+        retrieved = _retrieved_ids(search_item(row["query"]))
+        latency_ms = (time.perf_counter() - started) * 1000
+        metrics = retrieval_metrics(expected, retrieved)
+        old = retrieval_metrics(expected, old_description_ids(row["query"]))
+        rows.append({
+            "query_id": row["query_id"],
+            "query_type": row["query_type"],
+            "query": row["query"],
+            "intent": intent,
+            "latency_ms": latency_ms,
+            **metrics,
+            "old_recall": old["recall"],
+            "old_precision": old["precision"],
+            "old_f1": old["f1"],
+            "old_mrr": old["reciprocal_rank"],
+            "old_shown": old["n_returned"],
+        })
+    return pd.DataFrame(rows)
+
+
+def macro_row(frame, **extra):
+    ranked = frame.dropna(subset=["reciprocal_rank"])
+    out = {
+        "Queries": len(frame),
+        "Recall": frame["recall"].mean(),
+        "Precision": frame["precision"].mean(),
+        "F1": frame["f1"].mean(),
+        "MRR": ranked["reciprocal_rank"].mean() if len(ranked) else np.nan,
+        "Shown": frame["n_returned"].mean(),
+        "Mean ms": frame["latency_ms"].mean(),
+        "P95 ms": float(np.percentile(frame["latency_ms"], 95)),
+    }
+    out.update(extra)
+    return out
+
+
+shipped = score_file("data/search_queries.csv")
+tests = score_file("data/query_tests.csv")
+
+shipped_summary = macro_row(shipped)
+tests_summary = macro_row(tests)
+n_items = len(idx.sku_lookup)
+
+overall = pd.DataFrame([
+    {"File": "Shipped queries", **shipped_summary},
+    {"File": "Router tests", **tests_summary},
+])
+
+case_rows = []
+for name in CASE_ORDER:
+    part = shipped[shipped["query_type"] == name]
+    case_rows.append({"Case": CASE_LABEL[name], **macro_row(part)})
+by_case = pd.DataFrame(case_rows)
+
+intent_order = [name for name in INTENT_LABEL if name in set(tests["intent"])]
+intent_rows = []
+for name in intent_order:
+    part = tests[tests["intent"] == name]
+    intent_rows.append({"Route": INTENT_LABEL[name], **macro_row(part)})
+by_intent = pd.DataFrame(intent_rows)
+desc_ms = f"{by_intent.loc[by_intent['Route'] == 'Description', 'Mean ms'].iloc[0]:.0f}"
+
+fell_through = tests[tests["intent"] == "description"]
+fall_rows = []
+for name, part in fell_through.groupby("query_type"):
+    fall_rows.append({"Labeled as": name.replace("_", " "), **macro_row(part)})
+by_fallthrough = pd.DataFrame(fall_rows).sort_values("Recall")
+
+abbr_rows = []
+for _, row in tests[tests["query_type"].str.endswith("abbreviation")].iterrows():
+    q = row["query"].strip().lower()
+    if row["query_type"].startswith("category"):
+        match, score, _ = process.extractOne(q, idx.categories, scorer=fuzz.ratio)
+        vocab = "category"
+    else:
+        match, score, _ = process.extractOne(q, idx.manufacturers, scorer=fuzz.ratio)
+        vocab = "manufacturer"
+    abbr_rows.append({
+        "label": f"{row['query']}  ({vocab})",
+        "score": score,
+        "match": match,
+        "recall": row["recall"],
+    })
+abbr_scores = pd.DataFrame(abbr_rows).sort_values("score")
+closest = abbr_scores.sort_values("score", ascending=False).iloc[0]
+closest_label = str(closest["label"]).replace("&", "and")
+closest_score = f"{closest['score']:.0f}"
+misses = shipped[shipped["recall"] == 0][["query_id", "query"]]
+partial_cap = shipped[(shipped["query_type"] == "partial") & (shipped["n_expected"] > PEACH_FUZZ_TOP_K)]
+miss_text = "; ".join(
+    f"{row.query_id} ({row.query})" for row in misses.itertuples()
+).replace("&", "and")
+partial_list = list(partial_cap["query_id"])
+if len(partial_list) <= 1:
+    partial_ids = "".join(partial_list)
+elif len(partial_list) == 2:
+    partial_ids = f"{partial_list[0]} and {partial_list[1]}"
+else:
+    partial_ids = ", ".join(partial_list[:-1]) + f", and {partial_list[-1]}"
+
+lighting = search_item("Lighting")
+pop = conn.sql(
+    "SELECT lower(item_id) AS item_id, quantity_60d FROM item_popularity"
+).df()
+qty = dict(zip(pop["item_id"], pop["quantity_60d"]))
+preview_rows = []
+for rank, result in enumerate(lighting[:5], start=1):
+    info = idx.sku_lookup[result["item_id"].lower()]
+    description = str(info["description"]).replace("&", "and")
+    if len(description) > 52:
+        description = description[:49] + "..."
+    preview_rows.append({
+        "Order": rank,
+        "Item": result["item_id"],
+        "Description": description,
+        "Units in 60 days": int(qty[result["item_id"].lower()]),
+    })
+lighting_preview = pd.DataFrame(preview_rows)
+lighting_n = len(lighting)
+lighting_intent = lighting[0]["intent"]
+
+knob_compare = pd.DataFrame([
+    {
+        "Setting": "Chosen",
+        "Recall": shipped["recall"].mean(),
+        "Precision": shipped["precision"].mean(),
+        "F1": shipped["f1"].mean(),
+        "MRR": shipped.dropna(subset=["reciprocal_rank"])["reciprocal_rank"].mean(),
+        "Shown": shipped["n_returned"].mean(),
+    },
+    {
+        "Setting": "Earlier default",
+        "Recall": shipped["old_recall"].mean(),
+        "Precision": shipped["old_precision"].mean(),
+        "F1": shipped["old_f1"].mean(),
+        "MRR": shipped.dropna(subset=["old_mrr"])["old_mrr"].mean(),
+        "Shown": shipped["old_shown"].mean(),
+    },
+])
+
+def show_metrics(frame, cols):
+    out = frame[cols].copy()
+    for col in ["Recall", "Precision", "F1", "MRR", "Shown"]:
+        if col in out.columns:
+            out[col] = out[col].map(lambda v: "" if pd.isna(v) else f"{v:.3f}")
+    for col in ["Mean ms", "P95 ms"]:
+        if col in out.columns:
+            out[col] = out[col].map(lambda v: f"{v:.1f}")
+    if "Queries" in out.columns:
+        out["Queries"] = out["Queries"].astype(int)
+    return out
+
+
+def markdown_table(frame, caption, label):
+    cols = list(frame.columns)
+    lines = [
+        "| " + " | ".join(cols) + " |",
+        "| " + " | ".join(["---"] * len(cols)) + " |",
+    ]
+    for _, row in frame.iterrows():
+        lines.append("| " + " | ".join(str(v) for v in row) + " |")
+    lines.append("")
+    lines.append(f": {caption} {{#{label}}}")
+    return "\n".join(lines)
+```
+
+## What we cared about
+
+This search is for a person looking items up, often while they work through a list. Latency is part of the job. A slow query is annoying once. A slow query on every line of a list is how someone stops trusting the box.
+
+Recall matters more than precision. If the item is in the catalog and we do not show it, they cannot get it. If we show something they were not after, that is noise in the list. Noise is annoying. A hidden item is a failed search.
+
+We still did not want a junk list. On the 40 shipped description queries, the tuning rule was: keep recall at or above 0.90, and inside that band take the highest precision. Latency only picks between encoders when recall and precision are already within 0.02 and the faster model saves at least 10 ms on the median. That pass is in `notebooks/peach_fuzz_tuning.ipynb`. It chose MiniLM with alpha `{python} PEACH_FUZZ_ALPHA`, a semantic floor of `{python} PEACH_FUZZ_SEMANTIC_FLOOR`, `{python} PEACH_FUZZ_TOP_K` results, and a fused-score cutoff of `{python} DESCRIPTION_SCORE_CUTOFF`.
+
+Each query counts once (a macro average). A category with 50 items does not outweigh a single SKU.
+
+| Metric | What it answers |
+| --- | --- |
+| Recall | Of the items we should have shown, how many did we show? |
+| Precision | Of the items we showed, how many were right? |
+| F1 | The harmonic mean of those two, per query, then averaged. A long list pulls it down even when the right item is in the list. |
+| MRR | How close to the top the first right item sits. 1 means it was the first row. Queries with no right answer are skipped. |
+| Shown | Mean number of rows the person actually sees. |
+| Mean ms / P95 ms | Time for one query after the model is already loaded. P95 is the slow tail. |
+
+## What you get when you type
+
+The router decides the trip before any ranking happens.
+
+- A real SKU (`ITM-0101`) returns that one item.
+- A SKU-shaped id that is not in the catalog (`ITM-9999`, matching `itm-` plus four digits) returns the five nearest ids by edit distance. Those are guesses.
+- A category, a manufacturer name, or a manufacturer id opens the whole group. The rows are sorted by units ordered in the last 60 days (`gold.item_popularity`), busiest first. This is a shelf, not a similarity search.
+- Anything else is a description query. MiniLM and BM25 score the catalog text (description, category, manufacturer). The embedding has to clear the semantic floor or the item is dropped. The survivors are reranked, cut at 0.60, and at most 3 are shown, best score first.
+
+`Lighting` is a category hit. It returns `{python} lighting_n` items. The first five are the ones ordered most in the last 60 days, not an alphabetical slice of the catalog.
+
+```{python}
+#| output: asis
+print(markdown_table(
+    lighting_preview,
+    "First five rows for Lighting. The full category is behind them, in the same order.",
+    "tbl-lighting",
+))
+```
+
+A description query does not get this treatment. `thhn wire 12awg red 500' reel` is scored, and the person sees at most three rows.
+
+## Why the list is three items long
+
+The earlier description settings were looser: alpha 0.5, floor 0.30, 10 results, cutoff 0.50. They found a little more, and they did it by showing a longer list. The highest-recall corner of the grid was the same idea taken further. Recall was bought with extra near-misses.
+
+`top_k` of 3 cannot return every labeled item when the label has 7, which one partial query does (`coupling set screw`). We kept 3 anyway. A list of eight, offered so we do not miss one row, is a noisy search. The chart scores both settings on the same 40 queries, with the same metric code as `src/item_search/evals.py`.
+
+```{python}
+#| label: fig-knobs
+#| fig-cap: "Chosen settings against the earlier default, on the 40 shipped queries. Recall stays in the 0.90 band. Precision is what moves."
+#| fig-width: 6.4
+#| fig-height: 3.3
+
+fig, ax = plt.subplots(figsize=(6.4, 3.3))
+metrics = ["Recall", "Precision", "F1"]
+x = np.arange(len(metrics))
+width = 0.36
+chosen_vals = [knob_compare.loc[0, m] for m in metrics]
+old_vals = [knob_compare.loc[1, m] for m in metrics]
+b1 = ax.bar(x - width / 2, chosen_vals, width, color=RECALL_C, label="Chosen")
+b2 = ax.bar(x + width / 2, old_vals, width, color="#c8c8c8", label="Earlier default")
+for bars in (b1, b2):
+    for bar in bars:
+        ax.text(
+            bar.get_x() + bar.get_width() / 2,
+            bar.get_height() + 0.02,
+            f"{bar.get_height():.2f}",
+            ha="center",
+            va="bottom",
+            fontsize=8,
+        )
+ax.set_xticks(x)
+ax.set_xticklabels(metrics)
+ax.set_ylim(0, 1.15)
+ax.set_ylabel("Macro score")
+ax.legend(frameon=False, ncol=2, loc="upper right")
+fig.tight_layout()
+plt.show()
+```
+
+```{python}
+#| output: asis
+print(markdown_table(
+    show_metrics(knob_compare, ["Setting", "Recall", "Precision", "F1", "MRR", "Shown"]),
+    "Same comparison, with MRR and the mean list length. MRR barely moves. The list gets much shorter.",
+    "tbl-knobs",
+))
+```
+
+## The 40 shipped queries
+
+Every row in `data/search_queries.csv` is a description query. Nothing here is a category or a SKU. The headline numbers:
+
+```{python}
+#| output: asis
+print(markdown_table(
+    show_metrics(overall, ["File", "Queries", "Recall", "Precision", "F1", "MRR", "Shown", "Mean ms"]),
+    "Both files, one row per query, then averaged. The shipped file is the one the knobs were fit on.",
+    "tbl-overall",
+))
+```
+
+Recall is high and F1 is not, because precision is about half. The usual shipped query has one right item and we show two or three. One hit in a list of three is recall 1, precision 1/3, and F1 of 0.5. A lot of the file looks like that. The right item is usually first anyway: MRR is `{python} f"{shipped_summary['MRR']:.2f}"`.
+
+The four no-match queries (copper pipe, drywall screws, pex tubing, an HVAC filter) return nothing, so they score 1. The cutoff is doing that job. The earlier default did not. Its no-match precision on this file was the weak spot the cutoff was raised to fix.
+
+```{python}
+#| label: fig-cases
+#| fig-cap: "Shipped queries by the case written on the label. No-match is quiet. Exact, misspelled, and word-order find the item and still show extras. Partial is the one case where recall, not precision, is the softer number."
+#| fig-width: 7.0
+#| fig-height: 3.5
+
+fig, ax = plt.subplots(figsize=(7.0, 3.5))
+x = np.arange(len(by_case))
+width = 0.25
+series = [
+    ("Recall", by_case["Recall"], RECALL_C),
+    ("Precision", by_case["Precision"], PREC_C),
+    ("F1", by_case["F1"], F1_C),
+]
+for i, (name, values, color) in enumerate(series):
+    offset = (i - 1) * width
+    bars = ax.bar(x + offset, values, width, label=name, color=color)
+    for bar in bars:
+        ax.text(
+            bar.get_x() + bar.get_width() / 2,
+            bar.get_height() + 0.015,
+            f"{bar.get_height():.2f}",
+            ha="center",
+            va="bottom",
+            fontsize=7,
+        )
+ax.set_xticks(x)
+ax.set_xticklabels(by_case["Case"], rotation=15, ha="right")
+ax.set_ylim(0, 1.18)
+ax.set_ylabel("Macro score")
+ax.legend(frameon=False, ncol=3, loc="upper right")
+fig.tight_layout()
+plt.show()
+```
+
+```{python}
+#| output: asis
+print(markdown_table(
+    show_metrics(by_case, ["Case", "Queries", "Recall", "Precision", "F1", "MRR", "Shown"]),
+    "Same split, with list length. Shown is the mean number of rows returned.",
+    "tbl-cases",
+))
+```
+
+Three queries miss entirely: Q15, Q21, and Q25. Q15 and Q25 spell out a size of electrical metallic tubing, and Q21 (`3/4in white`) never clears the cutoff. Those two tubing queries are why abbreviation recall sits under the other single-item cases. Partial recall sits under the others because `{python} partial_ids` expect more items than the list can hold. On those queries every shown row is correct. Recall is capped by the length of the list, not by a wrong ranking.
+
+## Categories, manufacturers, SKUs
+
+`data/query_tests.csv` is the other file. It asks the router to open a shelf, catch a SKU, and survive abbreviations. Exact and lightly edited category and manufacturer names do open the shelf. Recall and precision there are 1: the whole group comes back, in popularity order, and the label is that same group.
+
+The file's overall recall (`{python} f"{tests_summary['Recall']:.2f}"`) looks much worse than that. Most of the gap is queries that never reach the shelf.
+
+```{python}
+#| output: asis
+print(markdown_table(
+    show_metrics(by_intent, ["Route", "Queries", "Recall", "Precision", "F1", "MRR", "Shown", "Mean ms"]),
+    "Router tests by the route the pipeline actually took. Category and manufacturer are the shelf. Description here is mostly queries that missed it.",
+    "tbl-routes",
+))
+```
+
+Read the description row as a mixed bin, not as "description search cannot find items." These are the queries that fell through:
+
+```{python}
+#| output: asis
+print(markdown_table(
+    show_metrics(by_fallthrough, ["Labeled as", "Queries", "Recall", "Precision", "F1", "Shown"]),
+    "What landed in description search on the router tests. Abbreviations dominate, and their expected lists are whole categories.",
+    "tbl-fallthrough",
+))
+```
+
+Abbreviations lose because the router asks for a whole-string match of at least `{python} CATEGORY_MATCH_THRESHOLD` against the catalog name. `lightng` still clears it. `gnd`, `ltg`, and `w and c` do not. Description search then returns at most 3 rows against a label of 17 to 58 items, or nothing if the fused score stays under 0.60. A list of 3 against 50 conduit fittings cannot have a high recall.
+
+```{python}
+#| label: fig-abbrev
+#| fig-cap: "Best whole-string match for each abbreviation. The line is the router threshold. Everything to the left is sent to description search."
+#| fig-width: 6.8
+#| fig-height: 4.6
+
+fig, ax = plt.subplots(figsize=(6.8, 4.6))
+colors = [RECALL_C if s >= CATEGORY_MATCH_THRESHOLD else MISS_C for s in abbr_scores["score"]]
+ax.barh(abbr_scores["label"], abbr_scores["score"], color=colors)
+ax.axvline(CATEGORY_MATCH_THRESHOLD, color="#222222", linewidth=1, linestyle="--")
+ax.set_xlabel("Fuzzy match against the catalog name")
+ax.set_xlim(0, 100)
+fig.tight_layout()
+plt.show()
+```
+
+The closest miss is `{python} closest_label` at `{python} closest_score`. Still under the line.
+
+Two SKU typos miss for a different reason. The pattern is `itm-` plus exactly four digits. `ITM-01011` has five digits. `ITM-O440` has a letter. Neither reaches the edit-distance helper, so description search runs and returns nothing. `ITM-9999` does match the pattern and is missing, so the person gets five lookalikes. The label says none of them are right, so precision is 0 and F1 is 0. Recall is scored as 1 only because there was no correct item to miss. The F1 is the number that matches the experience.
+
+## How long a query waits
+
+Times below are for one query, model already loaded. They include routing and, for description queries, one MiniLM encode plus the catalog scan. They are not the encoder-only medians in the tuning notebook (MiniLM was about 33 ms median and 151 ms at the 95th percentile on the encode itself).
+
+```{python}
+#| label: fig-latency
+#| fig-cap: "Mean latency on the router tests, by the route that ran. Description is the encode. The shelf lookups are not."
+#| fig-width: 6.4
+#| fig-height: 3.2
+
+fig, ax = plt.subplots(figsize=(6.4, 3.2))
+order = by_intent.sort_values("Mean ms")
+ax.barh(order["Route"], order["Mean ms"], color=RECALL_C)
+for route, ms in zip(order["Route"], order["Mean ms"]):
+    ax.text(ms + 0.4, route, f"{ms:.0f} ms", va="center", fontsize=8)
+ax.set_xlabel("Mean milliseconds")
+ax.set_xlim(0, order["Mean ms"].max() * 1.25)
+fig.tight_layout()
+plt.show()
+```
+
+On the shipped file the mean is `{python} f"{shipped_summary['Mean ms']:.0f}"` ms. Description queries on the router tests average `{python} desc_ms` ms, close to the notebook's encode median of about 33 ms. The tail is the part that moves: the notebook's 95th percentile on the encode alone was about 150 ms. Shelf lookups stay well under a millisecond either way. The router tests average `{python} f"{tests_summary['Mean ms']:.0f}"` ms overall because most of them never touch the encoder.
+
+Inside one encoder, the tuning grid barely moved query time. Changing alpha or the floor does not make MiniLM faster. The encoder is the wait.
+
+## Where this leaves us
+
+On the search it was tuned for, this is a good description finder. About 9 in 10 labeled items show up, the first row is usually the right one, and queries that should match nothing stay empty. People see a bit over 2 rows, not 6. F1 near 0.61 is the price of those extra rows. We accepted it because the alternative was a higher recall with a list full of near-misses.
+
+The shelf path works when the query still resembles the catalog string. Category and manufacturer hits return the whole group, most-ordered first. That is the right trip for "show me lighting" or "show me this manufacturer": popularity is the ranking, and similarity would be the wrong tool. Short abbreviations never start that trip. Fixing them means a different match than whole-string ratio at 87.5, for example a small alias list (`gnd` for grounding) or a token-level score. Raising `top_k` would not turn `gnd` into the grounding shelf.
+
+SKU lookup is exact when the id is well formed, and brittle when it is not. Widening the pattern just enough to catch a doubled digit or a letter/number slip, then running the edit-distance fallback, would cover the two typos in the test file without sending them through MiniLM.
+
+At `{python} n_items` items, a description query is already "embed the query, then touch the whole catalog." The index is built once per process, which is what we want. At 50,000 items that per-query scan is the cost that grows: one dot product against every embedding, and BM25 over every description. Category and manufacturer lookups do not grow that way. They return a group, and the group can be large, but they do not rescore the catalog. The semantic floor and the cutoff were fit here, where a good neighbor and a bad one sit at a known distance. A denser catalog moves those distances, so those two knobs should be fit again. A different encoder is worth swapping in only if recall and precision stay about where they are and the median actually drops. In the three-model pass, MiniLM had the best precision at the 0.90 recall line, which is why it is still the one in `src/item_search/config.py`.
