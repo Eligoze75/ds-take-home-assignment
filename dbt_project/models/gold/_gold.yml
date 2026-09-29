@@ -23,8 +23,11 @@ models:
 
   - name: fct_purchase_order_line
     description: >
-      Purchase order lines with header attributes (vendor, order date, status) attached.
-      Grain: one row per PO line. Feeds spend and price reporting.
+      Purchase order lines with header attributes (customer, vendor, order date, status) attached.
+      Grain: one row per PO line. The customer is the one on the purchase order header.
+      Exact duplicate lines are collapsed. A line is dropped when it alone explains the gap
+      between the header total and the sum of the lines, the item appears only once, and the
+      item has no vendor list price.
     columns:
       - name: po_number
         tests: [not_null]
@@ -39,11 +42,64 @@ models:
           - accepted_values:
               values: ['Open', 'Received', 'Closed', 'Cancelled']
 
+  - name: fct_purchase_line
+    description: >
+      Cleaned purchase lines for every customer, used to train the unit-price model.
+      One row per PO line. Same cleaning rules as fct_purchase_order_line, with catalog
+      attributes and the header total attached. customer_id is a model input.
+    columns:
+      - name: po_number
+        tests: [not_null]
+      - name: item_id
+        tests: [not_null]
+      - name: customer_id
+        tests: [not_null]
+      - name: vendor_id
+        tests: [not_null]
+      - name: order_date
+        tests: [not_null]
+      - name: quantity_ordered
+        tests: [not_null]
+      - name: unit_price_paid
+
+  - name: fct_company_a_purchase_line
+    description: >
+      Company A slice of fct_purchase_line. Same columns, restricted to CUST-A.
+    columns:
+      - name: po_number
+        tests: [not_null]
+      - name: item_id
+        tests: [not_null]
+      - name: customer_id
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['CUST-A']
+      - name: order_date
+        tests: [not_null]
+      - name: unit_price_paid
+
+  - name: t1_company_a_opportunity_items
+    description: >
+      Company A items used for the time-of-year question. One row per item that is bought
+      more often than 90% of the catalog, has at least 8 distinct purchase months spanning
+      a year, and has total spend above the median item. Cancelled orders are excluded.
+      value_of_1pct_price_change is total_spend / 100.
+    columns:
+      - name: item_id
+        tests: [unique, not_null]
+      - name: n_orders
+        tests: [not_null]
+      - name: attachment
+        tests: [not_null]
+      - name: total_spend
+        tests: [not_null]
+
   - name: item_purchase_history
     description: >
-      Legacy aggregate. One row per item: how often it has been purchased, earliest / latest
-      purchase dates, and a percentile breakdown of unit price paid. Feeds the procurement
-      analytics dashboards.
+      Legacy aggregate. One row per catalog item: how often it has been purchased, earliest / latest
+      purchase dates, and a percentile breakdown of unit price paid. Built from the cleaned
+      purchase order lines. Feeds the procurement analytics dashboards.
     columns:
       - name: item_id
         tests: [unique, not_null]
