@@ -95,6 +95,34 @@ models:
       - name: total_spend
         tests: [not_null]
 
+  - name: t1_baseline_pricing_model
+    description: >
+      Baseline rolling-median pricing model for Task 1b. Grain: one row per
+      (customer_id, item_id, vendor_id, order_date) seen in fct_purchase_line
+      (Cancelled orders excluded). Same-day lines are collapsed to a single daily
+      price first. rolling_median_price_60d is the median daily price over the
+      strictly preceding 60 calendar days for that customer/item/vendor combo
+      (the row's own day is never in its own window, so there is no future
+      leakage); it expands to whatever prior days exist when there are fewer
+      than 60, and is null the first time a combination is seen. 60 days (not 15)
+      because at this grain most combos are bought less than every 15 days, which
+      left ~89% of rows with no prior history under a 15-day window.
+      n_prior_days_with_price is the count of priced days behind that median,
+      so 0 means "no prior history, prediction is null."
+      To predict a price ahead of a new PO, look up the row with the largest
+      order_date <= the target date for that customer/item/vendor.
+    columns:
+      - name: customer_id
+        tests: [not_null]
+      - name: item_id
+        tests: [not_null]
+      - name: vendor_id
+        tests: [not_null]
+      - name: order_date
+        tests: [not_null]
+      - name: n_prior_days_with_price
+        tests: [not_null]
+
   - name: item_purchase_history
     description: >
       Legacy aggregate. One row per catalog item: how often it has been purchased, earliest / latest
