@@ -1,6 +1,6 @@
 # Remarcable Take Home Challenge
 
-A bit about the challenge: Company A wants to know when to buy and what price to expect. Everyone else just wants to find the right item. This repo is my pass at both. Item search is done. The price model is next.
+A bit about the challenge: Company A wants to know when to buy and what price to expect. Everyone else just wants to find the right item. This repo is my pass at both. Item search is done. When to buy is written up below. What price to expect is next.
 
 The search is built for someone standing at a counter, typing fast, sometimes with a SKU, sometimes with a category, sometimes with a half-remembered description. Waiting on a model for a SKU lookup would be a bad joke, so the pipeline only spends that time when the query is actually free text.
 
@@ -196,7 +196,21 @@ You can find a more elaborated documentation on Evals and final results in `[out
 - **Manufacturer id**. `MFG-01` should list that manufacturer's items. `MFG-99` should come back empty.
 - **Description partials**. `thhn 14 awg`, `wire nut`, and friends, where several items are right and top 3 might not hold all of them.
 
-## Price model
+## Company A: when to buy, and what price to expect
+
+### When to buy
+
+Company A asked if the items they reorder have a cheaper time of year, and what to weigh when a job can slip by a month or two.
+
+**What I treated as frequent.** An item counts as frequent when it shows up on more of Company A's orders than the 90th percentile. That is "often" for them. A burst still fails the cut: the item also has to cover at least a year and land in 8 different months, so a season is a habit. Spend has to clear the median as well. A slightly better price is only interesting where the dollars add up, and the far tail of spend is a few odd orders, so the median is the floor. Twelve items pass. Those are the ones with enough history to trust a pattern, enough spend to care, and the products this customer actually keeps buying.
+
+**The look.** Paid prices have been drifting up, so a raw monthly average will smile on the early months. I took the rise out two ways. Year-over-year change compares each month with the same month a year earlier, and a steady climb flattens into a rate. Detrending pulls a straight line off the series, and the leftover is the seasonal piece, read month by month. Each item is scored against its own typical price, so a cheap fitting and an expensive lug can share a chart.
+
+The series only makes sense after a cleanup. PO headers and lines disagree on `customer_id`, and I trusted the headers. The silver lines table had duplicates, which I dropped and fixed in gold too. A few items are missing from `item_pricing`, showed up once, and the header total was computed as if they were not on the order. Those sit out. That pass, and the first price notes, are in [`notebooks/pm_eda.ipynb`](notebooks/pm_eda.ipynb). The same cleanup notes open [`notebooks/pm_eda_p2.ipynb`](notebooks/pm_eda_p2.ipynb), and the seasonal work is the rest of that notebook.
+
+**Where it landed.** No calendar month is cheap for the whole frequent set. The month, when it is real, belongs to the item. A handful of them sat under their own trend in the same month every year on record, and buying the other units then would have saved money, about $945 across this history. A few more show the same shape and almost no dollars, so they stay on the job's schedule. High months are item-specific too: a good November on one lug is a bad reason to buy its neighbor. The note for a procurement manager is [`outputs/when_to_buy.pdf`](outputs/when_to_buy.pdf), rendered from [`report/when_to_buy.qmd`](report/when_to_buy.qmd). Rebuild it with `make report`.
+
+### What price to expect
 
 Coming up.
 
@@ -215,4 +229,4 @@ Coming up.
 
 ## Thanks
 
-*Built with ❤️ in 48 hours.*
+*Built with ❤️ in 72 hours.*

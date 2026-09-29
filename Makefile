@@ -9,7 +9,7 @@ DBT  := $(VENV)/bin/dbt
 DC   := docker compose
 RUN  := $(DC) run --rm
 
-.PHONY: setup image venv dbt deps test export data clean all package release dbt-local test-local export-local data-local
+.PHONY: setup image venv dbt deps test export data clean all package release dbt-local test-local export-local data-local report
 
 setup: image venv
 
@@ -55,6 +55,10 @@ clean:
 
 # Candidates: extend `all` so it regenerates everything your write-up cites into outputs/.
 all: data
+
+# Company A timing note. PDF lands in outputs/ via report/_quarto.yml.
+report:
+	QUARTO_PYTHON=$(CURDIR)/remarcable_env/bin/python quarto render report/when_to_buy.qmd
 
 # Candidate zip: everything except internal/, environments, build artefacts and OS litter (dbt_packages stay: vendored). Fails if anything internal slips in.
 PACKAGE := dsci_take_home_v7.zip
