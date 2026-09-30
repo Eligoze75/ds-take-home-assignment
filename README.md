@@ -266,10 +266,12 @@ So, it's explainable but requires a bit of work.
 
 **TreeHouse**: I named this model like that because it's a hierarchical pipeline of tree based models. As we already have item category, I only needed two layers, one classifier and one regressor. You can find the whole implementation in `src/price_model/tree_house/`. In short, a classifier (router) first puts the line in a band: low, mid, or high, cut from the training prices. It asks two yes/no questions, "at least mid?" and "high?", so labeling a low price item as high price counts for more than mixing up neighbors. Then the band's own model names the price. Neither step gets the item id. They get the description instead: a short embedding of the text (the same MiniLM used for search), plus the numbers written on it, like gauge, inches, and amps. Customer, vendor, category, and unit still go in. For the router they become "how often has this label been a higher price so far." For the experts they become a past average price, same idea as the singular regressor.
 
+In terms of model explainability, we're in a similar but worse position as with the Single Regressor. The use of embeddings and different experts make things difficult, but still I managed to generate an explainability report. You can visuallize it in `[report/price_quotes.qmd](report/price_quotes.qmd)`.
+
 ```mermaid
 flowchart TD
-    line["a line we have not priced yet"] --> desc["what the item is, from its description"]
-    line --> who["customer, vendor, category, unit, and the date"]
+    desc["what the item is, from its description"]
+    who["customer, vendor, category, unit, and the date"]
     desc --> router["router picks low, mid, or high"]
     who --> router
     router --> expert["the model trained on that band"]
@@ -304,6 +306,8 @@ flowchart TD
 - The seasonality cutoffs (8 months, 365 days, spend above the catalog median, a $50 lifetime-savings floor) are judgment calls, not statistically derived. They're documented in 1.1 and 1.2 below, not discovered.
 - The price models assume the near future prices like the recent past. Nothing here detects a structural pricing change, a new vendor contract, a commodity shock, only retraining would pick that up.
 - The category and manufacturer router assumes a small, stable vocabulary (10 categories, 12 manufacturers today). That's a live assumption, not just a future risk, see the item search evals report for what breaks first at scale.
+- I'm also assuming you'll have wifi.
+- And I also assumed that model explainability is something desirable, rather than a strict rule. The models I trained lack on explainability, I managed to get some of it, but I had in mind that maybe in this case, being precise is more important than explainable.
 
 ## Thanks
 
