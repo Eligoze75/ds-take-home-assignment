@@ -1,6 +1,6 @@
 ---
 title: "When to buy the items you purchase most"
-subtitle: "For Company A. Purchases from January 2024 through September 2026."
+subtitle: "Procurement briefing for Company A. Purchases from January 2024 through September 2026."
 date: today
 date-format: "MMMM D, YYYY"
 format:
@@ -10,21 +10,23 @@ format:
     mainfont: Helvetica
     fontsize: 10.5pt
     geometry:
-      - margin=0.7in
+      - margin=0.6in
     colorlinks: false
     number-sections: false
     toc: false
-    fig-pos: "H"
+    fig-pos: "ht"
     include-in-header:
       text: |
         \usepackage{float}
         \usepackage{parskip}
-        \setlength{\parskip}{0.4em}
+        \setlength{\parskip}{0.28em}
         \setlength{\parindent}{0pt}
         \usepackage{caption}
-        \captionsetup{font=footnotesize,skip=3pt}
+        \captionsetup{font=footnotesize,skip=2pt}
+        \usepackage{enumitem}
+        \setlist{itemsep=0.15em, topsep=0.15em}
         \makeatletter
-        \renewcommand{\section}{\@startsection{section}{1}{0pt}{0.85em}{0.3em}{\normalfont\large\bfseries}}
+        \renewcommand{\section}{\@startsection{section}{1}{0pt}{0.55em}{0.2em}{\normalfont\large\bfseries}}
         \newcommand{\subtitle}[1]{%
           \apptocmd{\@title}{\par {\normalsize\mdseries #1\par}}{}{}%
         }
@@ -37,7 +39,7 @@ format:
             {\small \@date}%
           \end{center}%
           \par
-          \vskip 0.3em}
+          \vskip 0.25em}
         \makeatother
 execute:
   echo: false
@@ -103,6 +105,7 @@ focus = items.loc[
     & items["eligible"]
     & (items["total_spend"] > items["total_spend"].median())
 ].copy()
+focus_total_spend = float(focus["total_spend"].sum())
 
 priced = lines.loc[lines["item_id"].isin(focus["item_id"])].dropna(subset=["unit_price_paid"]).copy()
 priced["relative_price"] = (
@@ -216,6 +219,7 @@ no_timing = chosen.loc[chosen["savings"] < 15].sort_values("savings", ascending=
 # Sum the rounded dollars the table shows, so the headline matches the rows.
 recommend_total = float(recommend["savings"].round(0).sum())
 modest_total = float(modest["savings"].round(0).sum())
+recommend_share = recommend_total / focus_total_spend
 
 avoid_rows = []
 for item_id, month in AVOID:
@@ -272,17 +276,22 @@ def dollars(amount):
     return f"${amount:,.0f}"
 ```
 
-## Recommendation
+## Executive Summary & Actionable Recommendations
 
-There is no calendar month in which the items purchased most often are consistently less expensive. Timing should be set by item, and only where the job can move by one or two months. Where it cannot, the material should be purchased when the job requires it.
+There is no calendar month in which the items you buy most often are cheaper as a group. Seasonality, where it exists, belongs to the individual item, not to the catalog. Set purchase timing item by item, and only for the items below. For everything else, buy when the job requires the material. Chasing a calendar month on an item with no proven pattern will not save money and may cost time.
 
-Five items meet that condition. On the orders placed from `{python} screen["start"]` through `{python} screen["end"]`, purchasing the other units in the month below would have reduced cost by `{python} dollars(recommend_total)`. July for the metal box is the clearest pattern: it was under the item's own rise in all three years. November for the USB charger is the largest saving, and that month has only two years behind it, uneven ones (about 2% under in 2024 and about 6% under in 2025).
+Four directives, based on `{python} f"{screen['n_orders']:,}"` orders across `{python} screen["n_items"]` items, `{python} screen["start"]` through `{python} screen["end"]`:
+
+- **Shift five items to the months below, when the schedule allows it.** These are the only items with a repeated, same-direction price gap in every year on record. Moving the remaining purchases of these five items into their low month would have saved `{python} dollars(recommend_total)` on this history.
+- **Do not extend this logic to similar items.** Matching descriptions do not share a cheap month. The two Decora wall plates, the two copper lugs, and the metal and plastic device boxes each point in different directions or show no pattern at all.
+- **Treat the two-year patterns as provisional, not settled.** Three of the five recommendations below rest on two years of data, not three. Confirm November and September behave the same way once the 2026 data for those months exists before locking them into a standing purchasing calendar.
+- **Do not set a minimum order size to chase a volume discount.** Larger orders have sometimes carried a lower price in this data, but the pattern is not consistent as quantity increases: price drops, then rises, then drops again. It is not a reliable rule and should not drive order consolidation on its own.
 
 ```{python}
 #| output: asis
 
 header = (
-    "| Item | Month | Below trend | Years | Saving |\n"
+    "| Item | Buy in | Below trend | Years of evidence | Saving |\n"
     "|---|---|---:|---|---:|"
 )
 rows = []
@@ -294,12 +303,28 @@ for item_id, row in recommend.iterrows():
 print("\n".join([header, *rows]))
 ```
 
-The saving is the gap between the price paid in the other months and the low month, valued at the item's usual unit price. Units already purchased in that month are excluded.
+The saving is the gap between the price paid in other months and the low month, valued at the item's usual unit price. Units already purchased in the named month are excluded, so this is money left on the table, not a rebuild of full spend.
+
+## Financial & Operational Impact
+
+Retiming these five items would have saved `{python} dollars(recommend_total)` against `{python} dollars(round(focus_total_spend))` in spend on the twelve items reviewed, about `{python} f"{recommend_share:.1%}"` of that spend. Three further items show the same repeated pattern but not enough dollars to justify changing a process: the butt splice (August), the white wall plate (February), and the ivory wall plate (June), worth `{python} dollars(modest_total)` together. The remaining four reviewed items showed no month worth planning around; moving their purchases to the closest thing to a low month would have cost money, not saved it.
+
+This saving only converts to cash if two conditions hold: the job using the item can move by one or two months, or the material can be held without extra carrying cost that erases the saving, and the purchasing team actually tracks the five months rather than treating this as a one-time note. A job that cannot wait for July to buy the metal box should still buy the metal box when it is needed.
+
+A second, smaller cost is avoidable the same way: five items plus EMT conduit and the strut nut run measurably above trend in specific months (table below). Steering discretionary orders away from those months, where the schedule permits, avoids a premium without any new tracking beyond the buy list already in place.
+
+## Supporting Data
+
+Two charts and two tables from the underlying analysis carry the argument and are kept below. Everything else in the notebook, the catalog-wide histograms used to set the frequency and spend thresholds, the manufacturer and vendor breakdowns, the twelve-panel per-item and per-month grids, and the quantity and day-of-week charts, is an internal diagnostic and is dropped from this brief. The quantity chart is dropped as a headline visual specifically because its pattern is not monotonic and should not be read as a pricing rule; it is addressed as a caveat, not evidence, in Risk & Limitations.
+
+- **Savings-by-item chart** (below). Ranks all twelve reviewed items by dollars at stake, so it is clear at a glance which five are worth a process change.
+- **Seasonal evidence chart** (below). Shows the three years of data do not move together, which is the direct answer to whether a portfolio-wide low season exists.
+- **Recommendation and caution tables** (above and below). Compact, dollar-denominated, and map directly to an action.
 
 ```{python}
-#| fig-width: 6.6
-#| fig-height: 3.5
-#| fig-cap: "Saving if the other purchases had been made in the repeated low month. Dark bars are the five in the table. Pale bars are real months with too little money attached. The rest would not have saved money."
+#| fig-width: 6.4
+#| fig-height: 2.9
+#| fig-cap: "Saving if the other purchases had been made in the repeated low month. Dark bars are the five recommended items. Mid bars are real patterns too small to act on. Pale bars would not have saved money."
 
 chart = chosen.sort_values("savings", ascending=True)
 colors = []
@@ -335,18 +360,10 @@ ax.tick_params(length=0)
 fig.tight_layout()
 ```
 
-Three further items show a repeated low month, and the dollars are small: the butt splice in August (`{python} money("ITM-0621")`), the white wall plate in February (`{python} money("ITM-0433")`), and the ivory wall plate in June (`{python} money("ITM-0434")`). Together that is about `{python} dollars(modest_total)`. Heat-shrink tubing, the strut nut, the plastic old-work box, and the 4 AWG copper lug do not justify a change in timing. For the last three, moving the other purchases onto the shallow low month would have cost a few dollars, because those purchases were already at least as cheap.
-
-Two other results bear on the same decision. Across Company A's purchases, the unit price is unchanged from 1 unit through 12. At 24 units it has been about 4% lower, and at 50 units about 7% lower. The day of the week does not move the price.
-
-## Why there is no single month
-
-The figure places every year on one calendar. Each item is first compared with its own typical price, and each item counts equally. The left panel is the change versus the same month a year earlier. It stays positive: the price level has been rising, by about `{python} rise_label` from the start of 2024 to `{python} screen["end"]`. A January that looks inexpensive is mostly that rise. The right panel is what remains after a straight line is removed. A month that was inexpensive for the group would fall below zero in every year. The three lines do not agree. Waiting a full year to catch a dip of 2% or 3% gives the reduction back to the rise.
-
 ```{python}
 #| fig-width: 6.8
-#| fig-height: 2.7
-#| fig-cap: "Frequent items, each compared with its own typical price. Left: change versus the same month a year earlier. Right: price after the rise is removed."
+#| fig-height: 2.2
+#| fig-cap: "Frequent items, each compared with its own typical price. Left: change versus the same month a year earlier. Right: price after the rise is removed. The three years do not bend together, which is why no single month is recommended for the group."
 
 month_names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 year_color = {2024: "#2c7fb8", 2025: "#e6550d", 2026: "#31a354"}
@@ -374,21 +391,17 @@ for ax in axes:
     ax.grid(True, color="#e6e6e6", linewidth=0.6)
     ax.set_axisbelow(True)
 handles, labels = axes[1].get_legend_handles_labels()
-fig.legend(handles, labels, loc="upper center", ncol=3, frameon=False, fontsize=8, bbox_to_anchor=(0.5, 1.06))
-fig.tight_layout(rect=(0, 0, 1, 0.90))
+fig.legend(handles, labels, loc="upper center", ncol=3, frameon=False, fontsize=8, bbox_to_anchor=(0.5, 1.1))
+fig.tight_layout(rect=(0, 0, 1, 0.88))
 ```
 
-A similar item is not a guide. The white plate and the ivory plate, the two copper lugs, and the metal box and the plastic box do not share a month.
-
-## When not to buy
-
-A few months run high in every year they appear. Little of the spend fell in them, so the extra actually paid is small. Those amounts are not added to the `{python} dollars(recommend_total)`. Where the item is already in the table above, that saving already assumes the high-month purchases move.
+The price level itself has risen about `{python} rise_label` from the start of 2024 to `{python} screen["end"]`. A January that looks inexpensive in raw dollars is mostly that rise, not a seasonal discount. Every number in this brief is measured after removing it.
 
 ```{python}
 #| output: asis
 
 header = (
-    "| Item | Month | Above trend | Years | Extra paid |\n"
+    "| Item | Avoid in | Above trend | Years | Extra paid |\n"
     "|---|---|---:|---|---:|"
 )
 rows = []
@@ -400,26 +413,16 @@ for item_id, row in avoid.sort_values("extra", ascending=False).iterrows():
 print("\n".join([header, *rows]))
 ```
 
-June for the USB charger is the only row with real money on it, about `{python} dollars(avoid.loc["ITM-0426", "extra"])`. It is already inside the `{python} money("ITM-0426")`. March for EMT conduit was about 5% over in 2024 and about 6% over in 2025, and nearly flat in 2026, so March is the high side of that item without being a firm rule. November for the 4 AWG lug is the month in which the 2 AWG lug is low. A month should not be transferred from one to the other.
+June for the USB charger is the only row above with real money on it, `{python} dollars(avoid.loc["ITM-0426", "extra"])`, already folded into the `{python} money("ITM-0426")` November recommendation, not counted twice. The other four rows are real patterns on too little spend to matter on their own.
 
-## What the review covers
+## Risk & Limitations
 
-Cancelled orders are excluded. The history is `{python} f"{screen['n_orders']:,}"` orders and `{python} screen["n_items"]` items, from `{python} screen["start"]` through `{python} screen["end"]`.
+- **The strongest single number rests on the thinnest evidence.** The USB charger's `{python} money("ITM-0426")` November saving is the largest in the table, but it comes from only two Novembers (2024 and 2025), and those two years do not agree closely: about 2% under trend in 2024, about 6% under in 2025. The PVC conduit elbow's September figure and the copper lug's November figure are also two-year patterns. Treat these three as a working hypothesis to confirm in 2026, not a locked rule.
+- **This is a description of orders already placed, not a forecast.** November 2026 and the rest of the fourth quarter have not happened. Nothing here predicts what a vendor will charge next quarter; it summarizes what Company A paid in the past.
+- **Vendor discounts and negotiation are invisible in this data.** The analysis compares prices Company A actually paid to Company A's own history. It cannot tell whether a low month reflects the vendor's list price moving or a one-off concession Company A negotiated that will not repeat. A vendor could offer a better deal in any month for reasons this history will not show.
+- **Macro and commodity moves are not separated out.** Copper, freight, and broader market pricing can shift a unit price for reasons that have nothing to do with the calendar. A monthly pattern that lines up with a commodity cycle could look like seasonality here and be something else entirely.
+- **Holding and schedule costs are not in the model.** A low month only pays off if the job can move by a month or two, or if the material can sit in inventory without added carrying cost, storage risk, or damage. Neither is quantified here; both belong to the procurement and project teams' judgment.
+- **The quantity pattern is noisy and should not be treated as a fact.** Larger orders have sometimes shown a lower unit price at the higher end of order sizes seen in this data, but the relationship does not move in one direction: price drops, rises again, and drops again as order size increases further. Day of week shows no effect. Neither finding is verified against vendor pricing terms and neither should be used to set an order-size policy today.
+- **Similar items are not a guide to each other.** The white and ivory Decora wall plates, the two copper lug gauges, and the metal and plastic device boxes are close substitutes in the catalog and still do not share a cheap month, and in the case of the two lugs, point in opposite directions in the same month. Do not extend a finding on one item to a similar one without checking it separately.
 
-An item is in the timing review only if it clears three tests. The cutoffs are computed on the full catalog, and then all three are applied together.
-
-**Frequent.** The item is on more orders than 90% of the catalog. That bar is `{python} f"{screen['frequent_share']:.1%}"` of orders, about `{python} f"{screen['frequent_orders']:.0f}"` orders. `{python} screen["n_focus"]` items clear it. The busiest is on `{python} f"{screen['max_attachment']:.1%}"` of orders. A rule that required the item on most orders would have returned nothing, because a typical order has only a few lines.
-
-**Long enough to compare a season.** At least 8 distinct months, and at least a year between the first and last purchase. `{python} screen["n_eligible"]` items clear this on their own. All `{python} screen["n_focus"]` frequent items already span the window, so this test removed none of them.
-
-**Enough spend to be worth a better price.** Total dollars above the median item, about `{python} dollars(round(screen["spend_cutoff"]))`. The median is the bar because the top of the spend distribution is a few very large items, and a high percentile would let those items decide the list. Every frequent item is already above the median. The smallest of the `{python} screen["n_focus"]` is about `{python} dollars(round(screen["min_focus_spend"]))`.
-
-## What we did
-
-The paid price is compared with that item's own typical price, the median unit price on its purchases. A straight line is then removed. Without that step, an early month looks cheap because it is earlier in the rise. A month counts only when it sits on the same side of that line in every year with a purchase. One month is kept per item: more years first, then the deeper gap. The dollar figure uses the other purchases only, valued at the typical price.
-
-## What this record cannot account for
-
-The amounts describe orders already placed. They are not a price for the next order. November 2026 has not occurred, so the two November recommendations rest on 2024 and 2025, as does September for the PVC elbow.
-
-A vendor can offer a discount this history does not show. Copper, freight, and the wider market can move a price for reasons a month will not explain. These purchases alone do not show whether a low month is the vendor's list price or a price Company A negotiated. The cost of holding material, or of a job that waits, is not in the record. A low month is useful only when the work can move by a month or two, or the material can be held.
+**Scope of this review.** Cancelled orders are excluded. An item entered the review only if it was frequent (top 10% of orders by attachment, at least `{python} f"{screen['frequent_share']:.1%}"` of orders), had enough history to compare a season (purchased in at least 8 distinct months across at least a year), and carried enough spend to be worth a better price (above the catalog's median item spend). `{python} screen["n_focus"]` items cleared all three tests; the five recommendations and three marginal cases above are drawn from that set of twelve.
