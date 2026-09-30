@@ -270,14 +270,15 @@ In terms of model explainability, we're in a similar but worse position as with 
 
 ```mermaid
 flowchart TD
-    desc["what the item is, from its description"]
-    who["customer, vendor, category, unit, and the date"]
-    desc --> router["router picks low, mid, or high"]
+    line["a line we have not priced yet"] --> desc["what the item is, from its description"]
+    line --> who["customer, vendor, category, unit, and the date"]
+    desc --> router["router: low, mid, or high?"]
     who --> router
-    router --> expert["the model trained on that band"]
+    router -->|"band"| expert["the model trained on that band"]
     desc --> expert
     who --> expert
     expert --> price["expected unit price"]
+
 ```
 
 **Results.** On the holdout, TreeHouse is about 4.2% off ($0.36) across all 547 lines. The singular regressor is about 18.8% off ($0.76). The baseline can only speak on 190 of those lines, the ones with a recent price for that same trio, and there it is about 8.6% off ($0.49). On those same 190 lines the singular regressor is still behind it, at 15.1%. A recent paid price is a better guess than a long average of the item, and the singular regressor never sees that recent price. TreeHouse still beats the baseline on those lines too, at 3.9%. The baseline's weak spot is a few quotes that are far off: its typical miss is small, and its worst misses are large. The write-up is `[outputs/price_quotes.pdf](outputs/price_quotes.pdf)`, rendered from `[report/price_quotes.qmd](report/price_quotes.qmd)`. Rebuild it with `make report-price`. That target trains first, because the report loads `outputs/models/t1_single_regressor.joblib`.
