@@ -23,6 +23,7 @@ format:
         \captionsetup{font=footnotesize,skip=2pt}
         \usepackage{enumitem}
         \setlist{itemsep=0.15em, topsep=0.15em}
+jupyter: ds-take-home
 execute:
   echo: false
   warning: false
@@ -61,6 +62,7 @@ def find_root() -> Path:
 
 
 ROOT = find_root()
+DATA_DIR = Path(os.environ.get("DATA_DIR", ROOT / "data"))
 sys.path.insert(0, str(ROOT))
 
 from src.item_search.config import (
@@ -136,8 +138,8 @@ def retrieval_metrics(expected, retrieved):
     }
 
 
-def score_file(path):
-    queries = pd.read_csv(ROOT / path)
+def score_file(name):
+    queries = pd.read_csv(DATA_DIR / name)
     rows = []
     for _, row in queries.iterrows():
         intent, _, _ = classify_query(row["query"], idx)
@@ -172,8 +174,8 @@ def macro_row(frame, **extra):
     return out
 
 
-shipped = score_file("data/search_queries.csv")
-tests = score_file("data/query_tests.csv")
+shipped = score_file("search_queries.csv")
+tests = score_file("query_tests.csv")
 n_items = len(idx.sku_lookup)
 n_categories = len(idx.categories)
 n_manufacturers = len(idx.manufacturers)
@@ -224,7 +226,7 @@ def old_description_ids(query):
 
 old_metrics = pd.DataFrame([
     retrieval_metrics(_parse_ids(row["expected_item_ids"]), old_description_ids(row["query"]))
-    for _, row in pd.read_csv(ROOT / "data/search_queries.csv").iterrows()
+    for _, row in pd.read_csv(DATA_DIR / "search_queries.csv").iterrows()
 ])
 
 

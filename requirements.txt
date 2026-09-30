@@ -1,16 +1,28 @@
-dbt-duckdb>=1.9,<2.0
-duckdb>=1.1
-pandas>=2.0
-pyyaml>=6.0
-scikit-learn>=1.4
-xgboost>=2.0
-shap>=0.45
-matplotlib>=3.8
-jupyter>=1.0
-numpy>=1.26
-dask>=2024.4
-seaborn>=0.13
-category_encoders>=2.6
-sentence-transformers>=3.0
-ipykernel>=6.29
-rank_bm25>=0.2.2
+# Pinned to remarcable_env, the environment the notebooks and reports were run in.
+# shap==0.52.0 is installed by the Makefile with --no-deps: its metadata
+# requires numpy>=2, but this env runs it on numpy 1.26.4 beside torch 2.2.2.
+dbt-duckdb==1.11.0
+duckdb==1.5.5
+pandas==3.0.6
+numpy==1.26.4
+scipy==1.17.1
+scikit-learn==1.9.1
+joblib==1.6.0
+xgboost==3.4.1
+matplotlib==3.11.2
+seaborn==0.13.2
+torch==2.2.2
+transformers==4.57.6
+huggingface-hub==0.36.2
+tokenizers==0.22.2
+sentence-transformers==3.4.1
+rank-bm25==0.2.2
+rapidfuzz==3.14.6
+jupyter==1.1.1
+ipykernel==7.3.0
+numba==0.62.1
+llvmlite==0.45.1
+slicer==0.0.8
+tqdm==4.70.1
+cloudpickle==3.1.2
+packaging==26.3

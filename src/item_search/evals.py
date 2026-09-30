@@ -7,13 +7,15 @@ anything drops precision, and returning nothing scores as a perfect result.
 MRR and MAP skip those queries, because there is no relevant item to rank.
 """
 
+import os
 import time
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
-_DATA_DIR = Path(__file__).resolve().parents[2] / "data"
+_ROOT = Path(__file__).resolve().parents[2]
+_DATA_DIR = Path(os.environ.get("DATA_DIR", _ROOT / "data"))
 DATASETS = {
     "search_queries": _DATA_DIR / "search_queries.csv",
     "query_tests": _DATA_DIR / "query_tests.csv",

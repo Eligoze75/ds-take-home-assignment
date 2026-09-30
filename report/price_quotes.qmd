@@ -38,6 +38,7 @@ format:
           \par
           \vskip 0.2em}
         \makeatother
+jupyter: ds-take-home
 execute:
   echo: false
   warning: false
@@ -68,9 +69,15 @@ from sklearn.metrics import (
     r2_score,
 )
 
-ROOT = Path.cwd()
-if not (ROOT / "data").exists():
-    ROOT = ROOT.parent
+def find_root() -> Path:
+    here = Path.cwd().resolve()
+    for cand in [here, *here.parents]:
+        if (cand / "Makefile").exists() and (cand / "src").exists():
+            return cand
+    return here
+
+
+ROOT = find_root()
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 

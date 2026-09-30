@@ -41,6 +41,7 @@ format:
           \par
           \vskip 0.25em}
         \makeatother
+jupyter: ds-take-home
 execute:
   echo: false
   warning: false
@@ -49,15 +50,24 @@ execute:
 
 ```{python}
 #| output: false
+import os
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-ROOT = Path.cwd()
-if not (ROOT / "data" / "gold").exists():
-    ROOT = ROOT.parent
+
+def find_root() -> Path:
+    here = Path.cwd().resolve()
+    for cand in [here, *here.parents]:
+        if (cand / "Makefile").exists() and (cand / "assignment.md").exists():
+            return cand
+    return here
+
+
+ROOT = find_root()
+DATA_DIR = Path(os.environ.get("DATA_DIR", ROOT / "data"))
 
 SHORT = {
     "ITM-0426": "USB charger receptacle",
@@ -85,7 +95,7 @@ AVOID = [
     ("ITM-0611", 11),
 ]
 
-lines = pd.read_csv(ROOT / "data/gold/fct_company_a_purchase_line.csv", parse_dates=["order_date"])
+lines = pd.read_csv(DATA_DIR / "gold" / "fct_company_a_purchase_line.csv", parse_dates=["order_date"])
 lines = lines.loc[lines["status"] != "Cancelled"].copy()
 lines["extended"] = lines["quantity_ordered"] * lines["unit_price_paid"]
 n_orders = lines["po_number"].nunique()
