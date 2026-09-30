@@ -1,6 +1,8 @@
 # dbt
 dbt_project/target/
 dbt_project/logs/
+# Per-machine anonymous id. dbt recreates it; nothing reads it.
+dbt_project/.user.yml
 # Global gitignore ignores *.sql (meant for dumps). These are project source.
 !dbt_project/models/**/*.sql
 !dbt_project/macros/**/*.sql

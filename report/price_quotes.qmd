@@ -260,7 +260,7 @@ print(
 )
 ```
 
-## Why one quote moved
+## Model Explainability
 
 Both models predict the log of one plus the price. Each percent below is the shift in one plus the price: a plus raises the quote, a minus lowers it. The singular regressor names the item. TreeHouse does not. It uses the description, and a gauge or a length appears on its own only when it moves the price by at least half a percent.
 
