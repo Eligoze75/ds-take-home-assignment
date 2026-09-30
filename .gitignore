@@ -5,8 +5,11 @@ dbt_project/logs/
 !dbt_project/models/**/*.sql
 !dbt_project/macros/**/*.sql
 
-# generated warehouse + outputs
+# generated warehouse, layer exports, and outputs
+# bronze CSVs, search_queries.csv, and query_tests.csv stay tracked
 data/warehouse.duckdb
+data/silver/
+data/gold/
 outputs/
 
 # python

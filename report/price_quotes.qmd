@@ -1,0 +1,452 @@
+---
+title: "What price to expect"
+subtitle: "Baseline, one regressor, and TreeHouse. Holdout purchases from July 2026 on."
+date: today
+date-format: "MMMM D, YYYY"
+format:
+  pdf:
+    documentclass: article
+    pdf-engine: xelatex
+    mainfont: Helvetica
+    fontsize: 10pt
+    geometry:
+      - margin=0.65in
+    colorlinks: false
+    number-sections: false
+    toc: false
+    include-in-header:
+      text: |
+        \usepackage{float}
+        \usepackage{booktabs}
+        \usepackage{parskip}
+        \setlength{\parskip}{0.35em}
+        \setlength{\parindent}{0pt}
+        \makeatletter
+        \renewcommand{\section}{\@startsection{section}{1}{0pt}{0.7em}{0.25em}{\normalfont\large\bfseries}}
+        \newcommand{\subtitle}[1]{%
+          \apptocmd{\@title}{\par {\normalsize\mdseries #1\par}}{}{}%
+        }
+        \pagestyle{empty}
+        \def\@maketitle{%
+          \newpage
+          \null
+          \begin{center}%
+            {\large\bfseries \@title \par}%
+            \vskip 0.12em
+            {\small \@date}%
+          \end{center}%
+          \par
+          \vskip 0.2em}
+        \makeatother
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+## How to read the score
+
+I rank the models on MAPE. A miss of \$0.40 is a lot on a box of staples and not much on a load center. MAPE scores each line against its own price, so "about 4\% off" means the same thing on both. MAE, in dollars, is the figure to put next to it for a buyer. It is pulled around by the expensive lines.
+
+`mean_ratio` and `median_ratio` are the quoted price divided by the price that was paid. 1.0 means the quote matches. Above 1.0 the quote is high. Below 1.0 it is low. `median_ratio` is the typical line: 0.97 means the middle quote is about 3\% under what was paid. `mean_ratio` averages those same line-by-line ratios, so a few quotes that are far too high pull it above the median.
+
+```{python}
+#| output: asis
+import os
+import sys
+from pathlib import Path
+
+import duckdb
+import joblib
+import numpy as np
+import pandas as pd
+import shap
+from sklearn.metrics import (
+    mean_absolute_error,
+    mean_absolute_percentage_error,
+    mean_squared_error,
+    r2_score,
+)
+
+ROOT = Path.cwd()
+if not (ROOT / "data").exists():
+    ROOT = ROOT.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from src.price_model.single_regressor.features import build_training_features
+from src.price_model.tree_house import TreeHouse
+from src.price_model.tree_house.attributes import SPEC_COLUMNS
+from src.price_model.tree_house.features import build_training_features as build_th_features
+from src.price_model.utils import dev_oot_split, prediction_bias
+
+OOT_START = "2026-07-01"
+TARGET_COL = "unit_price_paid"
+DATE_COL = "order_date"
+DATA_DIR = Path(os.environ.get("DATA_DIR", ROOT / "data"))
+MODELS_DIR = Path(os.environ.get("MODELS_DIR", ROOT / "outputs" / "models"))
+LINE_KEYS = ["po_number", "customer_id", "item_id", "vendor_id", "order_date", "unit_price_paid"]
+PRICE_KEYS = ["customer_id", "item_id", "vendor_id", "order_date"]
+GROUP_COLS = ("item_id", "customer_id", "vendor_id", "category", "unit_of_measure")
+
+
+def price_metrics(y_true, y_pred):
+    y_true = np.asarray(y_true, dtype=float)
+    y_pred = np.asarray(y_pred, dtype=float)
+    row = {
+        "n": int(len(y_true)),
+        "MAE": mean_absolute_error(y_true, y_pred),
+        "RMSE": mean_squared_error(y_true, y_pred) ** 0.5,
+        "MAPE": mean_absolute_percentage_error(y_true, y_pred) * 100,
+        "R2": r2_score(y_true, y_pred),
+    }
+    row.update(prediction_bias(y_true, y_pred))
+    return row
+
+
+FENCE = chr(96) * 3
+
+
+def raw_latex(body: str) -> None:
+    print(f"{FENCE}{{=latex}}")
+    print(body)
+    print(FENCE)
+
+
+def tex(value) -> str:
+    return (
+        str(value)
+        .replace("\\", "\\textbackslash{}")
+        .replace("&", "\\&")
+        .replace("%", "\\%")
+        .replace("_", "\\_")
+        .replace("#", "\\#")
+        .replace("$", "\\$")
+    )
+
+
+def latex_table(frame: pd.DataFrame, colspec: str) -> str:
+    header = " & ".join(tex(c) for c in frame.columns) + r" \\"
+    body = "\n".join(
+        " & ".join(tex(v) for v in row) + r" \\"
+        for row in frame.itertuples(index=False, name=None)
+    )
+    return (
+        "\\begin{tabular}{" + colspec + "}\n\\toprule\n"
+        + header
+        + "\n\\midrule\n"
+        + body
+        + "\n\\bottomrule\n\\end{tabular}"
+    )
+
+
+conn = duckdb.connect(str(DATA_DIR / "warehouse.duckdb"), read_only=True)
+df = conn.sql("""
+    SELECT
+        POL.po_number, POL.order_date, POL.customer_id, POL.vendor_id, POL.item_id,
+        DI.description, DI.search_text, DI.category, DI.unit_of_measure,
+        POL.unit_price_paid, POL.status
+    FROM gold.fct_purchase_order_line POL
+    INNER JOIN gold.dim_item DI ON POL.item_id = DI.item_id
+    WHERE POL.status <> 'Cancelled'
+""").df()
+df["order_date"] = pd.to_datetime(df["order_date"])
+
+item_median = df.loc[df["item_id"] == "ITM-0902", "unit_price_paid"].median()
+is_jump = (df["item_id"] == "ITM-0902") & (df["unit_price_paid"] > 5.0 * item_median)
+df = df.loc[~is_jump].reset_index(drop=True)
+
+origin = df[DATE_COL].min()
+feat_df, _encoders = build_training_features(
+    df, target_col=TARGET_COL, date_col=DATE_COL, origin=origin,
+    smoothing=10.0, group_cols=GROUP_COLS,
+)
+feat_df["log_price"] = np.log1p(feat_df[TARGET_COL])
+FEATURE_COLS = [f"{c}_te" for c in GROUP_COLS] + ["days_since_start"]
+feat_df = feat_df.dropna(subset=FEATURE_COLS + ["log_price"]).reset_index(drop=True)
+dev, oot = dev_oot_split(feat_df, DATE_COL, OOT_START)
+oot = oot.sort_values(DATE_COL).reset_index(drop=True)
+
+sr = joblib.load(MODELS_DIR / "t1_single_regressor.joblib")
+sr_pred = np.expm1(sr.predict(oot[FEATURE_COLS]))
+
+th_frame, th_artifacts = build_th_features(
+    df, target_col=TARGET_COL, date_col=DATE_COL, origin=origin, oot_start=OOT_START,
+)
+te_cols = [c for c in th_artifacts["expert_cols"] if c.endswith("_te")]
+th_frame = th_frame.dropna(subset=te_cols + [TARGET_COL, "price_bucket"]).reset_index(drop=True)
+th_dev, th_oot = dev_oot_split(th_frame, DATE_COL, OOT_START)
+th_dev = th_dev.sort_values(DATE_COL).reset_index(drop=True)
+th_oot = th_oot.sort_values(DATE_COL).reset_index(drop=True)
+
+locked = {"n_estimators": 300, "max_depth": 4, "learning_rate": 0.05}
+tree_house = TreeHouse(classifier_params=locked, regressor_params=locked)
+tree_house.fit(
+    th_dev, th_dev[TARGET_COL],
+    router_cols=th_artifacts["router_cols"],
+    expert_cols=th_artifacts["expert_cols"],
+    cuts=th_artifacts["cuts"],
+)
+detail = tree_house.predict_detail(th_oot)
+th_pred = detail["predicted_price"].to_numpy()
+
+baseline = conn.sql("""
+    SELECT customer_id, item_id, vendor_id, order_date, rolling_median_price_60d
+    FROM gold.t1_baseline_pricing_model
+""").df()
+baseline["order_date"] = pd.to_datetime(baseline["order_date"])
+
+eval_df = oot[LINE_KEYS].copy()
+eval_df["sr_pred"] = sr_pred
+eval_df = eval_df.merge(baseline, on=PRICE_KEYS, how="left", validate="many_to_one")
+th_attach = th_oot[LINE_KEYS].copy()
+th_attach["th_pred"] = th_pred
+eval_df = eval_df.sort_values(LINE_KEYS, kind="mergesort")
+th_attach = th_attach.sort_values(LINE_KEYS, kind="mergesort")
+eval_df["_occ"] = eval_df.groupby(LINE_KEYS, sort=False).cumcount()
+th_attach["_occ"] = th_attach.groupby(LINE_KEYS, sort=False).cumcount()
+eval_df = eval_df.merge(
+    th_attach[LINE_KEYS + ["_occ", "th_pred"]],
+    on=LINE_KEYS + ["_occ"], how="left", validate="one_to_one",
+)
+covered = eval_df["rolling_median_price_60d"].notna()
+part = eval_df.loc[covered]
+
+rows = {
+    "Baseline": price_metrics(part["unit_price_paid"], part["rolling_median_price_60d"]),
+    "Singular regressor, same lines": price_metrics(part["unit_price_paid"], part["sr_pred"]),
+    "TreeHouse, same lines": price_metrics(part["unit_price_paid"], part["th_pred"]),
+    "Singular regressor, full holdout": price_metrics(oot["unit_price_paid"], sr_pred),
+    "TreeHouse, full holdout": price_metrics(th_oot["unit_price_paid"], th_pred),
+}
+comparison = pd.DataFrame(rows).T
+show = pd.DataFrame({
+    "Quote": comparison.index,
+    "Lines": comparison["n"].astype(int),
+    "MAPE": comparison["MAPE"].map(lambda v: f"{v:.1f}%"),
+    "MAE": comparison["MAE"].map(lambda v: f"${v:.3f}"),
+    "median ratio": comparison["median_ratio"].map(lambda v: f"{v:.3f}"),
+    "mean ratio": comparison["mean_ratio"].map(lambda v: f"{v:.3f}"),
+})
+raw_latex("\\small\n" + latex_table(show, "@{}lrrrrr@{}") + "\n\\normalsize")
+print()
+
+same = comparison.loc[
+    ["Baseline", "Singular regressor, same lines", "TreeHouse, same lines"]
+]
+best = same["MAPE"].idxmin().split(",")[0]
+n_same = int(same.iloc[0]["n"])
+n_full = int(comparison.loc["TreeHouse, full holdout", "n"])
+bits = ", ".join(
+    f"{name.split(',')[0]} {row['MAPE']:.1f}% (${row['MAE']:.3f})"
+    for name, row in same.iterrows()
+)
+print(
+    f"On the {n_same} lines all three can price: {bits}. "
+    f"{best} is the closest on that shared set. "
+    f"On all {n_full} holdout lines, TreeHouse is "
+    f"{comparison.loc['TreeHouse, full holdout', 'MAPE']:.1f}% off "
+    f"and the singular regressor is "
+    f"{comparison.loc['Singular regressor, full holdout', 'MAPE']:.1f}% off. "
+    "The first three rows are the purchases where this customer, this item, and this vendor "
+    "have a price in the prior 60 days. The baseline has no answer on the rest."
+)
+```
+
+## Why one quote moved
+
+Both models predict the log of one plus the price. Each percent below is the shift in one plus the price: a plus raises the quote, a minus lowers it. The singular regressor names the item. TreeHouse does not. It uses the description, and a gauge or a length appears on its own only when it moves the price by at least half a percent.
+
+```{python}
+#| output: asis
+BUCKET_LABELS = {0: "low", 1: "mid", 2: "high"}
+TE_DRIVERS = {
+    "customer_id_te": ("customer", "customer_id"),
+    "vendor_id_te": ("vendor", "vendor_id"),
+    "category_te": ("category", "category"),
+    "unit_of_measure_te": ("unit of measure", "unit_of_measure"),
+}
+SPEC_PRETTY = {
+    "awg": ("wire gauge", "AWG"),
+    "n_conductors": ("conductors", ""),
+    "size_in": ("trade size", "in"),
+    "amps": ("amperage", "A"),
+    "watts": ("wattage", "W"),
+    "length_ft": ("length", "ft"),
+    "gang": ("gang", ""),
+    "pack_qty": ("pack size", ""),
+    "n_poles": ("poles", ""),
+    "n_ways": ("ways", ""),
+    "n_spaces": ("spaces", ""),
+    "box_l": ("box length", "in"),
+    "box_w": ("box width", "in"),
+    "box_h": ("box height", "in"),
+    "nominal_w": ("nominal width", "in"),
+    "nominal_h": ("nominal height", "in"),
+}
+FEATURE_LABELS = {
+    "item_id_te": "item",
+    "customer_id_te": "customer",
+    "vendor_id_te": "vendor",
+    "category_te": "category",
+    "unit_of_measure_te": "unit of measure",
+}
+
+item_desc = df.drop_duplicates("item_id").set_index("item_id")["description"].to_dict()
+vendor_name = (
+    conn.sql("SELECT vendor_id, vendor_name FROM gold.dim_vendor")
+    .df()
+    .set_index("vendor_id")["vendor_name"]
+    .to_dict()
+)
+history = pd.concat([th_dev, th_oot], ignore_index=True)
+
+
+def raw_label(group_col: str, value: str) -> str:
+    if group_col == "item_id":
+        return f"{value}, {item_desc.get(value, 'unknown item')}"
+    if group_col == "vendor_id":
+        return f"{value}, {vendor_name.get(value, 'unknown vendor')}"
+    return str(value)
+
+
+def n_prior(frame: pd.DataFrame, group_col: str, value: str, asof: pd.Timestamp) -> int:
+    mask = (
+        (frame[group_col].astype(str) == str(value))
+        & (frame[DATE_COL] < asof)
+        & frame[TARGET_COL].notna()
+    )
+    return int(mask.sum())
+
+
+def spec_label(col: str, value) -> str:
+    name, unit = SPEC_PRETTY[col]
+    if pd.isna(value):
+        return f"{name}, not in the description"
+    text = f"{name}, {value:g}"
+    return f"{text} {unit}".rstrip()
+
+
+def effect_frame(entries: list[dict]) -> pd.DataFrame:
+    out = pd.DataFrame(entries).sort_values("abs_shap", ascending=False)
+    out["Effect"] = out["pct_effect"].map(lambda v: f"{v:+.1f}%".replace("+", "+ ").replace("-", "- "))
+    out["What it is"] = [
+        f"{label} *" if thin else label
+        for label, thin in zip(out["label"], out["thin_history"])
+    ]
+    return out.rename(columns={"driver": "Driver"})[["Driver", "What it is", "Effect"]]
+
+
+oot = oot.copy()
+th_oot = th_oot.copy()
+oot["_occ"] = oot.groupby(LINE_KEYS, sort=False).cumcount()
+th_oot["_occ"] = th_oot.groupby(LINE_KEYS, sort=False).cumcount()
+example = oot.iloc[0]
+same_line = np.logical_and.reduce([
+    th_oot[col].eq(example[col]).to_numpy() for col in LINE_KEYS + ["_occ"]
+])
+th_pos = int(np.flatnonzero(same_line)[0])
+sr_pos = int(example.name)
+
+sv = shap.TreeExplainer(sr)(oot.iloc[[sr_pos]][FEATURE_COLS])[0]
+sr_entries = []
+for col in GROUP_COLS:
+    shap_val = float(sv.values[FEATURE_COLS.index(f"{col}_te")])
+    prior = n_prior(feat_df, col, example[col], example[DATE_COL])
+    sr_entries.append({
+        "driver": FEATURE_LABELS[f"{col}_te"],
+        "label": raw_label(col, example[col]),
+        "pct_effect": (np.exp(shap_val) - 1) * 100,
+        "thin_history": prior < 10,
+        "abs_shap": abs(shap_val),
+    })
+shap_val = float(sv.values[FEATURE_COLS.index("days_since_start")])
+sr_entries.append({
+    "driver": "time trend",
+    "label": f"{example[DATE_COL]:%Y-%m-%d}",
+    "pct_effect": (np.exp(shap_val) - 1) * 100,
+    "thin_history": False,
+    "abs_shap": abs(shap_val),
+})
+
+bucket = int(detail["predicted_bucket"].iloc[th_pos])
+expert = tree_house.experts_.get(bucket)
+explainer = shap.TreeExplainer(expert if expert is not None else tree_house.fallback_)
+band = BUCKET_LABELS[bucket] if expert is not None else "fallback"
+X = th_oot.iloc[[th_pos]][tree_house.expert_cols_]
+th_sv = explainer(X)[0]
+shap_by_name = dict(zip(tree_house.expert_cols_, th_sv.values))
+th_row = th_oot.iloc[th_pos]
+th_entries = []
+for te_col, (driver, group_col) in TE_DRIVERS.items():
+    shap_val = float(shap_by_name[te_col])
+    prior = n_prior(history, group_col, th_row[group_col], th_row[DATE_COL])
+    th_entries.append({
+        "driver": driver,
+        "label": raw_label(group_col, th_row[group_col]),
+        "pct_effect": (np.exp(shap_val) - 1) * 100,
+        "thin_history": prior < 10,
+        "abs_shap": abs(shap_val),
+    })
+emb_cols = [c for c in tree_house.expert_cols_ if c.startswith("emb_")]
+emb_shap = float(sum(shap_by_name[c] for c in emb_cols))
+prior_item = n_prior(history, "item_id", th_row["item_id"], th_row[DATE_COL])
+th_entries.append({
+    "driver": "description",
+    "label": str(item_desc.get(th_row["item_id"], th_row.get("description", ""))),
+    "pct_effect": (np.exp(emb_shap) - 1) * 100,
+    "thin_history": prior_item < 10,
+    "abs_shap": abs(emb_shap),
+})
+for col in SPEC_COLUMNS:
+    if col not in shap_by_name:
+        continue
+    shap_val = float(shap_by_name[col])
+    pct = (np.exp(shap_val) - 1) * 100
+    if abs(pct) < 0.5:
+        continue
+    th_entries.append({
+        "driver": SPEC_PRETTY[col][0],
+        "label": spec_label(col, th_row[col]),
+        "pct_effect": pct,
+        "thin_history": False,
+        "abs_shap": abs(shap_val),
+    })
+shap_val = float(shap_by_name["days_since_start"])
+th_entries.append({
+    "driver": "time trend",
+    "label": f"{th_row[DATE_COL]:%Y-%m-%d}",
+    "pct_effect": (np.exp(shap_val) - 1) * 100,
+    "thin_history": False,
+    "abs_shap": abs(shap_val),
+})
+
+sr_table = effect_frame(sr_entries)
+th_table = effect_frame(th_entries)
+paid = float(example[TARGET_COL])
+sr_quote = float(np.expm1(float(sv.base_values) + float(sv.values.sum())))
+th_quote = float(np.expm1(float(th_sv.base_values) + float(th_sv.values.sum())))
+desc = item_desc.get(example["item_id"], "")
+print(
+    f"**PO {example['po_number']}, {desc}, {example[DATE_COL]:%B %-d, %Y}.** "
+    f"Paid ${paid:,.2f}."
+)
+print()
+print(
+    f"**Singular regressor.** Quoted ${sr_quote:,.2f}, "
+    f"from a typical price of ${np.expm1(float(sv.base_values)):,.2f}."
+)
+print()
+raw_latex("\\small\n" + latex_table(sr_table, "@{}lp{4.5in}r@{}") + "\n\\normalsize")
+print()
+print(
+    f"**TreeHouse, {band} band.** Quoted ${th_quote:,.2f}, "
+    f"from that band's typical price of ${np.expm1(float(th_sv.base_values)):,.2f}."
+)
+print()
+raw_latex("\\small\n" + latex_table(th_table, "@{}lp{4.5in}r@{}") + "\n\\normalsize")
+star = bool(sr_table["What it is"].str.endswith("*").any() or th_table["What it is"].str.endswith("*").any())
+if star:
+    print()
+    print("A star means fewer than 10 earlier purchases, so that figure is leaning on the overall average.")
+```
