@@ -39,7 +39,7 @@ dbt build
 
 &nbsp;
 
-`DATA_DIR` selects the dataset: the bronze files are read from `$DATA_DIR/bronze/` and the warehouse is written to `$DATA_DIR/warehouse.duckdb`. In Docker the host `DATA_DIR` is mounted at `/data`; locally it defaults to `../data` relative to this folder.
+`DATA_DIR` selects the dataset: the bronze files are read from `$DATA_DIR/bronze/` and the warehouse is written to `$DATA_DIR/warehouse.duckdb`. In Docker the default is `/app/data`, the repo's `data/` folder through the single repo mount. Point `DATA_DIR` at a directory outside the repo and `make` mounts that path at `/data` instead. Locally it defaults to `../data` relative to this folder.
 
 ## Notes
 

@@ -5,6 +5,23 @@ MODELS_DIR ?= $(CURDIR)/outputs/models
 export DATA_DIR
 export MODELS_DIR
 
+# VirtioFS (Docker Desktop's default on Apple Silicon) deadlocks if data/ is
+# bind-mounted on top of the repo mount. It is already at /app/data. A dataset
+# that lives outside the repo is the only case that gets a second mount.
+REPO_ROOT := $(abspath $(CURDIR))
+HOST_DATA := $(abspath $(DATA_DIR))
+REL_DATA := $(patsubst $(REPO_ROOT)/%,%,$(HOST_DATA))
+ifeq ($(HOST_DATA),$(REPO_ROOT))
+  CONTAINER_DATA_DIR := /app
+  DATA_VOLUME :=
+else ifeq ($(REL_DATA),$(HOST_DATA))
+  CONTAINER_DATA_DIR := /data
+  DATA_VOLUME := -v "$(HOST_DATA):/data"
+else
+  CONTAINER_DATA_DIR := /app/$(REL_DATA)
+  DATA_VOLUME :=
+endif
+
 VENV := $(CURDIR)/.venv
 PY   := $(VENV)/bin/python
 DBT  := $(VENV)/bin/dbt
@@ -12,7 +29,7 @@ JUPYTER := $(VENV)/bin/jupyter
 TOOLS := $(CURDIR)/.tools
 QUARTO := $(TOOLS)/quarto/bin/quarto
 DC   := docker compose
-RUN  := $(DC) run --rm
+RUN  := $(DC) run --rm $(DATA_VOLUME) -e DATA_DIR="$(CONTAINER_DATA_DIR)"
 # Local Quarto and TinyTeX from `make setup`. The venv python executes the report code.
 quarto_render = texbin="$$(ls -d $(TOOLS)/TinyTeX/bin/*/ 2>/dev/null | head -1)"; \
 	if [ -f "$(TOOLS)/fonts.conf" ]; then export FONTCONFIG_FILE="$(TOOLS)/fonts.conf"; fi; \

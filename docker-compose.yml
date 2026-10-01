@@ -1,13 +1,19 @@
-# `make dbt` / `make data` / `make test` run through this. DATA_DIR on the host is mounted at /data.
+# `make dbt` / `make data` / `make test` run through this.
+# The repo is mounted once, at /app, and the warehouse is /app/data.
+# Do not also bind-mount ./data. On Apple Silicon, Docker Desktop shares files
+# with VirtioFS, which returns EDEADLK (errno 35, "Resource deadlock avoided")
+# when a subdirectory is mounted again on top of this share. dbt then dies on
+# its first read of profiles.yml. Intel Docker Desktop usually uses gRPC FUSE,
+# which allows the overlap, so the same file works there.
+# `make` adds a /data mount only when DATA_DIR points outside the repo.
 services:
   dbt:
     build: .
     image: procurement-lakehouse-dbt
     volumes:
       - .:/app
-      - ${DATA_DIR:-./data}:/data
     working_dir: /app/dbt_project
     environment:
-      DATA_DIR: /data
+      DATA_DIR: /app/data
     entrypoint: ["dbt"]
     command: ["build"]
