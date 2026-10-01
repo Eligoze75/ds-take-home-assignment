@@ -7,15 +7,16 @@
 #
 # This always uses a standalone, project-local CPython 3.12 managed by uv
 # under .tools/python/ (same no-sudo approach as the Quarto/TinyTeX installs
-# in install_tools.sh) -- it deliberately does NOT rely on uv's system/PATH
-# discovery (--managed-python; see `uv python find --help`): on real
-# machines, uv's system/conda discovery has handed back an active conda env
-# interpreter that was NOT actually Python 3.12+, silently breaking the venv.
-# Using only the interpreter uv manages itself removes that whole class of
-# mismatch. (Note: `--python-preference only-managed` looks like it should do
-# the same thing and is accepted without error by some uv versions, but does
-# NOT reliably exclude system interpreters -- that's exactly what broke this
-# the first time. `--managed-python` is the documented, stable flag.)
+# in install_tools.sh). It deliberately does NOT use `uv python find` to
+# resolve the interpreter: on real machines, `uv python find 3.12` -- even
+# with `--managed-python` / `--python-preference only-managed` -- has
+# returned an active conda env's interpreter that uv's own `uv python list`
+# miscategorizes as satisfying "3.12", which is not actually Python 3.12+.
+# That's an inconsistency in uv's own discovery/registry, not something a
+# flag reliably fixes across versions. So instead: use uv only to download
+# the interpreter, then locate the resulting binary ourselves by globbing
+# its known, documented install layout (cpython-<ver>-<os>-<arch>-<variant>/
+# bin/python<major>.<minor>) -- deterministic, no uv discovery involved.
 # uv itself is installed into .tools/uv/ if it isn't already on PATH.
 set -euo pipefail
 
@@ -46,7 +47,16 @@ export UV_PYTHON_INSTALL_DIR="$PY_INSTALL_DIR"
 echo "resolving a project-local Python $REQUIRED (downloading into .tools/python/ if needed)" >&2
 "$UV_BIN" python install "$REQUIRED" --managed-python >&2
 
-PYTHON_BIN="$("$UV_BIN" python find "$REQUIRED" --managed-python)"
+# Locate the binary ourselves instead of trusting `uv python find` (see note
+# above). Install dirs look like cpython-3.12.14-macos-aarch64-none/; pick
+# the newest if more than one patch version ever ends up installed.
+PYTHON_BIN="$(find "$PY_INSTALL_DIR" -maxdepth 3 -type f -name "python${REQUIRED}" -path '*/bin/*' 2>/dev/null \
+  | sort -V | tail -1)"
+
+if [[ -z "$PYTHON_BIN" ]]; then
+  echo "error: uv reported Python $REQUIRED installed, but no bin/python${REQUIRED} was found under $PY_INSTALL_DIR" >&2
+  exit 1
+fi
 
 # Defense in depth: verify the resolved interpreter really is >=3.12 before
 # handing it back, instead of trusting path/version-string discovery blindly.
