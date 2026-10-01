@@ -8,11 +8,14 @@
 # This always uses a standalone, project-local CPython 3.12 managed by uv
 # under .tools/python/ (same no-sudo approach as the Quarto/TinyTeX installs
 # in install_tools.sh) -- it deliberately does NOT rely on uv's system/PATH
-# discovery (--python-preference only-managed): on at least one real machine,
-# uv's system discovery handed back an active conda env's interpreter that
-# was reported as satisfying "3.12" but was not actually Python 3.12+,
-# which broke the venv silently. Using only the interpreter uv just
-# downloaded itself removes that whole class of mismatch.
+# discovery (--managed-python; see `uv python find --help`): on real
+# machines, uv's system/conda discovery has handed back an active conda env
+# interpreter that was NOT actually Python 3.12+, silently breaking the venv.
+# Using only the interpreter uv manages itself removes that whole class of
+# mismatch. (Note: `--python-preference only-managed` looks like it should do
+# the same thing and is accepted without error by some uv versions, but does
+# NOT reliably exclude system interpreters -- that's exactly what broke this
+# the first time. `--managed-python` is the documented, stable flag.)
 # uv itself is installed into .tools/uv/ if it isn't already on PATH.
 set -euo pipefail
 
@@ -38,11 +41,12 @@ mkdir -p "$PY_INSTALL_DIR"
 export UV_PYTHON_INSTALL_DIR="$PY_INSTALL_DIR"
 
 # Downloads into $PY_INSTALL_DIR if not already there; no-op (fast) otherwise.
-# Never touches the system/conda Python.
+# Never touches the system/conda Python. --managed-python forces uv to only
+# consider interpreters it manages itself, never a system/conda one.
 echo "resolving a project-local Python $REQUIRED (downloading into .tools/python/ if needed)" >&2
-"$UV_BIN" python install "$REQUIRED" --python-preference only-managed >&2
+"$UV_BIN" python install "$REQUIRED" --managed-python >&2
 
-PYTHON_BIN="$("$UV_BIN" python find "$REQUIRED" --python-preference only-managed)"
+PYTHON_BIN="$("$UV_BIN" python find "$REQUIRED" --managed-python)"
 
 # Defense in depth: verify the resolved interpreter really is >=3.12 before
 # handing it back, instead of trusting path/version-string discovery blindly.
