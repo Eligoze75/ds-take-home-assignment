@@ -29,7 +29,10 @@ image:
 	$(DC) build
 
 venv:
-	python3 -m venv $(VENV)
+	@PYTHON_BIN="$$(bash scripts/ensure_python.sh)"; \
+	test -n "$$PYTHON_BIN" || { echo "error: could not find or install Python 3.12+"; exit 1; }; \
+	echo "using $$PYTHON_BIN for $(VENV)"; \
+	"$$PYTHON_BIN" -m venv $(VENV)
 	$(PY) -m pip install -q --upgrade pip
 	$(PY) -m pip install -q -r requirements.txt
 	$(PY) -m pip install -q --no-deps shap==0.52.0

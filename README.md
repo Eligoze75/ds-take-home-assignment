@@ -71,7 +71,7 @@ I'm basically building over the repo you shared. The assignment already ships th
 
 ## Quick start
 
-Python 3.10+ and Docker (I kept your `requirements.txt` and just added a few more libraries). The dbt container uses `requirements-dbt.txt`. `make setup` also installs Quarto and TinyTeX under `.tools/`, and downloads `all-MiniLM-L6-v2`, so the reports and the search don't need the network after that.
+Python 3.12+ (xgboost and shap are pinned to versions that require it) and Docker (I kept your `requirements.txt` and just added a few more libraries). `make setup` resolves a Python 3.12+ interpreter itself via `scripts/ensure_python.sh` -- if your active `python3` is older (e.g. inside a conda env), it transparently downloads a project-local Python 3.12 into `.tools/` instead, so you don't need to change your shell's Python to run this. The dbt container uses `requirements-dbt.txt`. `make setup` also installs Quarto and TinyTeX under `.tools/`, and downloads `all-MiniLM-L6-v2`, so the reports and the search don't need the network after that.
 
 ```sh
 make setup      # dbt image, venv, Quarto, TinyTeX, and the MiniLM weights
